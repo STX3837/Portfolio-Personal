@@ -2,8 +2,9 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Home from '../../components/Home.astro';
 import { copy } from '../../lib/content';
+import { profile } from '../../data/profile';
 const t = copy.en;
 ---
-<BaseLayout locale="en" title="Alberto Paleteiro | Software Engineer" description={t.intro}>
+<BaseLayout locale="en" title={`${profile.name} | ${t.role}`} description={t.intro}>
   <Home locale="en" />
 </BaseLayout>

@@ -1,6 +1,7 @@
 ---
 import { copy, type Locale } from '../i18n/ui';
 import { localizedPath } from '../utils/routes';
+import { profile } from '../data/profile';
 interface Props { locale: Locale; path?: string }
 const { locale, path = '' } = Astro.props;
 const t = copy[locale];
@@ -8,7 +9,7 @@ const home = localizedPath(locale);
 const other = locale === 'es' ? 'en' : 'es';
 ---
 <header class="header wrap">
- <a class="logo" href={home} aria-label={`${t.home} — Alberto Paleteiro`}>AP<span>.</span></a>
+ <a class="logo" href={home} aria-label={`${t.home} — ${profile.name}`}>AP<span>.</span></a>
  <nav class="desktop-nav" aria-label={t.mainNav}>
   <a data-section="home" href={`${home}#home`} aria-current={!path ? 'location' : undefined}>{t.home}</a>
   <a data-section="projects" href={`${home}#projects`} aria-current={path ? 'location' : undefined}>{t.projects}</a>
@@ -17,7 +18,7 @@ const other = locale === 'es' ? 'en' : 'es';
  <div class="header-controls">
   <a class="locale" data-language href={localizedPath(other, path)} lang={other} hreflang={other} aria-label={t.switchLanguage}><span class:list={{chosen: locale === 'es'}}>ES</span><span aria-hidden="true">/</span><span class:list={{chosen: locale === 'en'}}>EN</span></a>
   <button class="theme-toggle" hidden data-dark-label={t.theme} data-light-label={t.lightTheme} aria-label={t.theme} aria-pressed="false"><span aria-hidden="true">◐</span></button>
-  <details class="mobile-menu"><summary>{t.menu}</summary><nav aria-label={t.mainNav}><a href={`${home}#home`}>{t.home}</a><a href={`${home}#projects`}>{t.projects}</a><a href={`${home}#about`}>{t.about}</a><a href={`${home}#contact`}>{t.contact}</a></nav></details>
+  <details class="mobile-menu"><summary>{t.menu}</summary><nav aria-label={t.mainNav}><a data-section="home" href={`${home}#home`} aria-current={!path ? 'location' : undefined}>{t.home}</a><a data-section="projects" href={`${home}#projects`} aria-current={path ? 'location' : undefined}>{t.projects}</a><a data-section="about" href={`${home}#about`}>{t.about}</a><a data-section="contact" href={`${home}#contact`}>{t.contact}</a></nav></details>
  </div>
 </header>
 <script>

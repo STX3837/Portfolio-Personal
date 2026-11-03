@@ -6,7 +6,10 @@
     "dev": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "test": "node scripts/check-config.mjs",
+    "check:build": "node scripts/check-build.mjs",
+    "check:browser": "node scripts/check-browser.mjs"
   },
   "dependencies": {
     "astro": "^5.0.0"
@@ -17,6 +20,6 @@
     "typescript": "^5.0.0"
   },
   "engines": {
-    "node": ">=22.19.0"
+    "node": ">=22.19.0 <23"
   }
 }

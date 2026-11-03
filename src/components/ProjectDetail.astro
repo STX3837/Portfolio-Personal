@@ -4,10 +4,11 @@ import ProjectArt from './ProjectArt.astro';
 import { copy, type Locale } from '../i18n/ui';
 import { projects, type Project } from '../data/projects';
 import { localizedPath } from '../utils/routes';
+import { profile } from '../data/profile';
 interface Props { locale: Locale; project: Project }
 const { locale, project } = Astro.props; const t = copy[locale]; const content = project.content[locale];
 ---
-<BaseLayout locale={locale} path={`projects/${project.slug}/`} title={`${content.title} | ${t.projects} | Alberto Paleteiro`} description={content.description}>
+<BaseLayout locale={locale} path={`projects/${project.slug}/`} title={`${content.title} | ${t.projects} | ${profile.name}`} description={content.description}>
  <main id="main" class="wrap project-detail"><a class="back-link" href={`${localizedPath(locale)}#projects`}>← {t.back}</a><header class="detail-heading"><p class="eyebrow">{t.projects} / 0{projects.indexOf(project) + 1}</p><h1>{content.title}</h1><p class="hero-description">{content.description}</p><ul class="tags" aria-label={t.technologies}>{project.tags.map(tag => <li>{tag}</li>)}</ul></header><ProjectArt slug={project.slug} index={projects.findIndex(item => item.slug === project.slug)} />
  <div class="detail-grid"><section><h2>{t.problem}</h2><p>{content.problem}</p></section><section><h2>{t.solution}</h2><p>{content.solution}</p></section><section><h2>{t.features}</h2><ul>{content.features.map(feature => <li>{feature}</li>)}</ul></section><section><h2>{t.architecture}</h2><ul>{content.architecture.map(item => <li>{item}</li>)}</ul></section><section><h2>{t.challenges}</h2><ul>{content.challenges.map(item => <li>{item}</li>)}</ul></section>{content.results && <section><h2>{t.results}</h2><ul>{content.results.map(item => <li>{item}</li>)}</ul></section>}</div>
  <aside class="documentation"><h2>{t.documentation}</h2><p>{t.documentationNote}</p></aside>

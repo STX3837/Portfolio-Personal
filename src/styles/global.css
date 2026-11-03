@@ -121,7 +121,7 @@ button[hidden] {
 .desktop-nav a {
   padding-block:14px;
 }
-.desktop-nav a[aria-current] {
+.desktop-nav a[aria-current],.mobile-menu a[aria-current] {
   color:var(--text);
   text-decoration:underline;
   text-underline-offset:8px;

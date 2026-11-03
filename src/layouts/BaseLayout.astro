@@ -4,6 +4,7 @@ import { copy, type Locale } from '../i18n/ui';
 import { localizedPath } from '../utils/routes';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { profile } from '../data/profile';
 interface Props { locale: Locale; title: string; description: string; path?: string }
 const { locale, title, description, path = '' } = Astro.props;
 const absolute = (route: string) => Astro.site ? new URL(route, Astro.site).href : undefined;
@@ -17,7 +18,7 @@ const canonical = absolute(localizedPath(locale, path));
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   {canonical && <link rel="canonical" href={canonical} />}
   {Astro.site && <><link rel="alternate" hreflang="es" href={absolute(localizedPath('es', path))} /><link rel="alternate" hreflang="en" href={absolute(localizedPath('en', path))} /><link rel="alternate" hreflang="x-default" href={absolute(localizedPath('es', path))} /></>}
-  <meta property="og:type" content="website" /><meta property="og:title" content={title} /><meta property="og:description" content={description} /><meta property="og:site_name" content="Alberto Paleteiro" /><meta property="og:locale" content={locale === 'es' ? 'es_ES' : 'en_GB'} />
+  <meta property="og:type" content="website" /><meta property="og:title" content={title} /><meta property="og:description" content={description} /><meta property="og:site_name" content={profile.name} /><meta property="og:locale" content={locale === 'es' ? 'es_ES' : 'en_GB'} />
   {canonical && <meta property="og:url" content={canonical} />}
   <meta name="twitter:card" content="summary" /><meta name="twitter:title" content={title} /><meta name="twitter:description" content={description} />
   <title>{title}</title>

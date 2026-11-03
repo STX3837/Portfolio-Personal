@@ -1,7 +1,7 @@
 export type Locale = 'es' | 'en';
 export const copy = {
  es: {
- role: 'Ingeniero del Software', greeting: 'Alberto Paleteiro', headline: 'Desarrollo software para resolver problemas reales.',
+ role: 'Ingeniero del Software', headline: 'Desarrollo software para resolver problemas reales.',
  intro: 'Soy ingeniero del software especializado en el desarrollo de aplicaciones web, diseño de arquitecturas y construcción de soluciones tecnológicas. Me interesa crear software mantenible, eficiente y centrado en las necesidades de las personas.',
  home: 'Inicio', projects: 'Proyectos', about: 'Sobre mí', contact: 'Contacto', viewProjects: 'Explorar proyectos', featured: 'Proyectos destacados',
  aboutTitle: 'Software con propósito. Ingeniería con criterio.', aboutText: 'Mi enfoque combina el desarrollo full-stack con el diseño de arquitecturas comprensibles y mantenibles. Me interesa conectar las necesidades de las personas con decisiones técnicas claras: desde el modelo de datos y la integración de APIs hasta las pruebas y la calidad del software.',
@@ -12,7 +12,7 @@ export const copy = {
  problem: 'El problema', solution: 'La solución', features: 'Características principales', architecture: 'Arquitectura técnica', challenges: 'Retos de implementación', results: 'Resultados documentados', documentation: 'Sobre este caso', documentationNote: 'Este resumen recoge las funcionalidades descritas del proyecto. Los detalles internos de arquitectura, las decisiones de implementación y los resultados quedan pendientes de documentación.', specialization: 'Desarrollo web · Arquitectura · IA aplicada', selected: 'Una selección de trabajo', aboutLabel: 'Enfoque profesional', links: 'Enlaces del proyecto',
  },
  en: {
- role: 'Software Engineer', greeting: 'Alberto Paleteiro', headline: 'I build software to solve real problems.',
+ role: 'Software Engineer', headline: 'I build software to solve real problems.',
  intro: 'I am a software engineer focused on web application development, architecture design, and building technology solutions. I care about creating maintainable, efficient software that meets people’s needs.',
  home: 'Home', projects: 'Projects', about: 'About', contact: 'Contact', viewProjects: 'Explore projects', featured: 'Featured projects',
  aboutTitle: 'Purposeful software. Thoughtful engineering.', aboutText: 'My approach brings full-stack development together with clear, maintainable architecture. I am interested in connecting people’s needs with sound technical decisions: from data modelling and API integration to testing and software quality.',
