@@ -4,7 +4,7 @@ Portfolio estático bilingüe con Astro, TypeScript estricto y CSS nativo. Espa�
 
 ## Requisitos y desarrollo
 
-Node.js **22.19 o posterior dentro de la rama 22**, npm y Git. Verificado con **22.23.4**. Node 20.11 no es compatible con las herramientas instaladas.
+Node.js **22.23.4 o posterior dentro de la rama 22**, npm y Git. Astro **7.4.5**, verificado con Node **22.23.4**. `.nvmrc` fija esa versión. Node 20.11 no es compatible; en Vercel selecciona **22.x** con parche al menos **22.23.4**.
 
 ```sh
 npm ci
@@ -79,7 +79,7 @@ Sustituye el valor ilustrativo por tu URL auténtica. Sin `SITE_URL` se omiten c
 ## Vercel
 
 1. Sube el repositorio a GitHub e impórtalo en Vercel.
-2. Selecciona el preset Astro y Node 22.x compatible con el requisito.
+2. Selecciona el preset Astro y Node 22.x con versión al menos 22.23.4.
 3. Configura `SITE_URL` con el origen de producción.
 4. Usa `npm run build` como compilación y `dist` como salida.
 
@@ -91,6 +91,8 @@ Consulta el [informe de preparación](docs/production-readiness.md) para las ver
 
 También se ejecutaron **80 casos reales en Chrome headless** e interacciones de tema, idioma y menú móvil. Las capturas y los resultados se guardan en `.verification/`, ignorado por Git. Una compilación con origen reservado `.invalid` validó el SEO de producción; ese origen se retira de la compilación local final.
 
-La auditoría online mantiene **5 paquetes con avisos (1 bajo, 3 altos y 1 crítico)** en el árbol de Astro 5.18.2. No hay correcciones dentro de todos los rangos compatibles actuales. No se ejecutó `npm audit fix --force` ni se realizó una migración mayor. El [informe de seguridad](docs/security-audit.md) identifica cada paquete, la exposición concreta y los riesgos y requisitos para migrar a Astro 7.4.5. Resolver esta migración sigue pendiente antes de cerrar la preparación de seguridad.
+Se completó la migración controlada **Astro 5.18.2 → 6.4.8 → 7.4.5** en `chore/astro-security-upgrade`. Tras una instalación limpia con `npm ci`, la auditoría pasó de **5 paquetes afectados (1 crítico, 3 altos y 1 bajo) a 0 vulnerabilidades notificadas**. Astro queda fijado en 7.4.5; el lockfile instala esbuild 0.28.2, sharp 0.35.5 y zod 4.6.7. zod-to-ts ya no forma parte del árbol. No se usaron overrides ni `npm audit fix --force`.
+
+Se conservaron íntegramente los componentes, configuración, diseño y datos personales. La regresión vuelve a pasar: tests, tipos, build, verificación de dist y los 80 casos de navegador. El [informe de seguridad](docs/security-audit.md) detalla versiones y auditorías; el [informe de preparación](docs/production-readiness.md) recoge las pruebas y pasos de publicación. El resultado es apto técnicamente para despliegue estático con Node compatible y `SITE_URL` auténtico; no se ha desplegado. Una auditoría sin avisos no garantiza ausencia de vulnerabilidades desconocidas.
 
 Pendiente de aportar: email, perfiles sociales, repositorios, CV, dominio y detalles internos/resultados documentados de proyectos. Estos datos no se han inventado.
