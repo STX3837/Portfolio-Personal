@@ -1,0 +1,10 @@
+---
+import { profile } from '../data/profile';
+import { copy, type Locale } from '../i18n/ui';
+import { localizedPath } from '../utils/routes';
+import SocialLinks from './SocialLinks.astro';
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = copy[locale]; const home = localizedPath(locale);
+---
+<footer class="footer wrap"><div><a class="logo" href={home}>AP.</a><p>© {new Date().getFullYear()} {profile.name}</p><p>{t.footer}</p></div><nav aria-label={t.mainNav}><a href={`${home}#projects`}>{t.projects}</a><a href={`${home}#about`}>{t.about}</a><a href={`${home}#contact`}>{t.contact}</a><SocialLinks /></nav></footer>

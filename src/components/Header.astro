@@ -1,0 +1,55 @@
+---
+import { copy, type Locale } from '../i18n/ui';
+import { localizedPath } from '../utils/routes';
+interface Props { locale: Locale; path?: string }
+const { locale, path = '' } = Astro.props;
+const t = copy[locale];
+const home = localizedPath(locale);
+const other = locale === 'es' ? 'en' : 'es';
+---
+<header class="header wrap">
+ <a class="logo" href={home} aria-label={`${t.home} — Alberto Paleteiro`}>AP<span>.</span></a>
+ <nav class="desktop-nav" aria-label={t.mainNav}>
+  <a data-section="home" href={`${home}#home`} aria-current={!path ? 'location' : undefined}>{t.home}</a>
+  <a data-section="projects" href={`${home}#projects`} aria-current={path ? 'location' : undefined}>{t.projects}</a>
+  <a data-section="about" href={`${home}#about`}>{t.about}</a><a data-section="contact" href={`${home}#contact`}>{t.contact}</a>
+ </nav>
+ <div class="header-controls">
+  <a class="locale" data-language href={localizedPath(other, path)} lang={other} hreflang={other} aria-label={t.switchLanguage}><span class:list={{chosen: locale === 'es'}}>ES</span><span aria-hidden="true">/</span><span class:list={{chosen: locale === 'en'}}>EN</span></a>
+  <button class="theme-toggle" hidden data-dark-label={t.theme} data-light-label={t.lightTheme} aria-label={t.theme} aria-pressed="false"><span aria-hidden="true">◐</span></button>
+  <details class="mobile-menu"><summary>{t.menu}</summary><nav aria-label={t.mainNav}><a href={`${home}#home`}>{t.home}</a><a href={`${home}#projects`}>{t.projects}</a><a href={`${home}#about`}>{t.about}</a><a href={`${home}#contact`}>{t.contact}</a></nav></details>
+ </div>
+</header>
+<script>
+ const toggle = document.querySelector<HTMLButtonElement>('.theme-toggle');
+ const media = window.matchMedia('(prefers-color-scheme: dark)');
+ const sync = () => {
+  const dark = document.documentElement.dataset.theme === 'dark';
+  toggle?.setAttribute('aria-pressed', String(dark));
+  toggle?.setAttribute('aria-label', (dark ? toggle.dataset.lightLabel : toggle.dataset.darkLabel) || 'Theme');
+ };
+ if (toggle) { toggle.hidden = false; sync(); toggle.addEventListener('click', () => {
+  const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = theme;
+  try { localStorage.setItem('theme', theme); } catch {}
+  sync();
+ }); }
+ media.addEventListener('change', () => {
+  let stored = null; try { stored = localStorage.getItem('theme'); } catch {}
+  if (stored !== 'dark' && stored !== 'light') { document.documentElement.dataset.theme = media.matches ? 'dark' : 'light'; sync(); }
+ });
+ const language = document.querySelector<HTMLAnchorElement>('[data-language]');
+ language?.addEventListener('click', () => { if (language) language.hash = window.location.hash; });
+ const menu = document.querySelector<HTMLDetailsElement>('.mobile-menu');
+ menu?.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { if (menu) menu.open = false; }));
+ document.addEventListener('keydown', event => { if (event.key === 'Escape' && menu?.open) { menu.open = false; menu.querySelector('summary')?.focus(); } });
+ const sections = document.querySelectorAll('main > section[id]');
+ if ('IntersectionObserver' in window) {
+  const observer = new IntersectionObserver(entries => {
+   for (const entry of entries) if (entry.isIntersecting) document.querySelectorAll<HTMLAnchorElement>('[data-section]').forEach(link => {
+    if (link.dataset.section === entry.target.id) link.setAttribute('aria-current', 'location'); else link.removeAttribute('aria-current');
+   });
+  }, { rootMargin: '-15% 0px -55% 0px', threshold: 0 });
+  sections.forEach(section => observer.observe(section));
+ }
+</script>

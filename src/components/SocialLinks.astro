@@ -1,0 +1,4 @@
+---
+import { socialLinks } from '../data/profile';
+---
+{socialLinks.map(link => <a href={link.href} target="_blank" rel="noopener noreferrer">{link.label} <span aria-hidden="true">↗</span></a>)}

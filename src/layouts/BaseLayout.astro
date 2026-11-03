@@ -1,20 +1,29 @@
 ---
 import '../styles/global.css';
-import type { Locale } from '../lib/content';
-interface Props { locale: Locale; title: string; description: string }
-const { locale, title, description } = Astro.props;
+import { copy, type Locale } from '../i18n/ui';
+import { localizedPath } from '../utils/routes';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+interface Props { locale: Locale; title: string; description: string; path?: string }
+const { locale, title, description, path = '' } = Astro.props;
+const absolute = (route: string) => Astro.site ? new URL(route, Astro.site).href : undefined;
+const canonical = absolute(localizedPath(locale, path));
 ---
 <!doctype html>
 <html lang={locale}>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content={description} />
-    <meta name="theme-color" content="#fafaf9" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="alternate" hreflang="es" href="/" />
-    <link rel="alternate" hreflang="en" href="/en/" />
-    <title>{title}</title>
-  </head>
-  <body><slot /></body>
+ <head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content={description} /><meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  {canonical && <link rel="canonical" href={canonical} />}
+  {Astro.site && <><link rel="alternate" hreflang="es" href={absolute(localizedPath('es', path))} /><link rel="alternate" hreflang="en" href={absolute(localizedPath('en', path))} /><link rel="alternate" hreflang="x-default" href={absolute(localizedPath('es', path))} /></>}
+  <meta property="og:type" content="website" /><meta property="og:title" content={title} /><meta property="og:description" content={description} /><meta property="og:site_name" content="Alberto Paleteiro" /><meta property="og:locale" content={locale === 'es' ? 'es_ES' : 'en_GB'} />
+  {canonical && <meta property="og:url" content={canonical} />}
+  <meta name="twitter:card" content="summary" /><meta name="twitter:title" content={title} /><meta name="twitter:description" content={description} />
+  <title>{title}</title>
+  <script is:inline>
+   (() => { let saved; try { saved = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = saved === 'light' || saved === 'dark' ? saved : window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; })();
+  </script>
+ </head>
+ <body><a class="skip-link" href="#main">{copy[locale].skip}</a><Header locale={locale} path={path} /><slot /><Footer locale={locale} /></body>
 </html>

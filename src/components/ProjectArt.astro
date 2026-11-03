@@ -1,0 +1,5 @@
+---
+interface Props { slug: string; index?: number }
+const { slug, index = 0 } = Astro.props;
+---
+<div class={`project-art art-${slug}`} aria-hidden="true"><span class="art-mark">0{index + 1} / {slug === 'distans' ? 'COMMERCE' : slug === 'aura' ? 'TRAVEL' : 'SIMULATION'}</span><div class="art-diagram"><span></span><span></span><span></span><span></span><span></span></div><span class="art-caption">{slug === 'distans' ? 'DISTANS' : slug === 'aura' ? 'AURA' : 'NETWORK / AI'}</span></div>
