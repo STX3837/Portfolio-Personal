@@ -54,13 +54,15 @@ try {
     await evaluate('document.fonts.ready.then(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))');
   }
   const results = [];
-  const paths = ['/', '/en/', ...['distans', 'aura', 'cyber-simulation'].flatMap(slug => [`/projects/${slug}/`, `/en/projects/${slug}/`])];
+  const paths = ['/', '/en/', ...['distans', 'puerto-dataspace-edc', 'aura'].flatMap(slug => [`/projects/${slug}/`, `/en/projects/${slug}/`])];
   for (const width of [320, 375, 768, 1024, 1440]) {
     await send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: false });
     for (const theme of ['light', 'dark']) {
       await navigate('/'); await evaluate(`localStorage.setItem('theme', '${theme}')`);
       for (const path of paths) {
         await navigate(path);
+        // Technical content must also fit when readers open the native disclosures.
+        if (path.includes('/projects/')) await evaluate("document.querySelectorAll('.technical-section').forEach(section => section.open = true)");
         const result = await evaluate(`(() => {
           const root = document.documentElement;
           const visible = selector => getComputedStyle(document.querySelector(selector)).display !== 'none';

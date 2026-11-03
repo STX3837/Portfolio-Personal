@@ -10,10 +10,11 @@ export const socialLinks = [
  { label: 'LinkedIn', href: profile.linkedin },
 ].filter(link => link.href);
 export const technologies = [
- ['Python', 'Java', 'TypeScript', 'JavaScript', 'SQL'],
- ['Django', 'FastAPI', 'Spring Boot', 'Flask'],
- ['HTML', 'CSS', 'Astro'],
+ ['Python', 'Java', 'Django', 'FastAPI', 'Flask', 'Spring Boot'],
+ ['HTML', 'CSS', 'JavaScript', 'TypeScript', 'Astro'],
  ['PostgreSQL', 'PostGIS', 'MySQL', 'MariaDB', 'Oracle'],
- ['Git', 'GitHub', 'Docker', 'Linux'],
- ['TensorFlow', 'Keras', 'NetLogo'],
-];
+ ['Docker', 'Docker Compose', 'Git', 'GitHub', 'Linux'],
+ [{ es: 'APIs REST', en: 'REST APIs' }, 'Eclipse Dataspace Components', 'Dataspace Protocol', { es: 'Integración de servicios', en: 'Service integration' }],
+ ['Keycloak', 'HashiCorp Vault', 'DCP'],
+ [{ es: 'Integración de modelos de lenguaje', en: 'Language model integration' }],
+] as const;

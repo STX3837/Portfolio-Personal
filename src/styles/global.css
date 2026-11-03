@@ -343,25 +343,25 @@ button[hidden] {
 .art-aura .art-diagram span:nth-child(5) {
   transform:translateY(-40px);
 }
-.art-cyber-simulation .art-diagram {
+.art-puerto-dataspace-edc .art-diagram {
   transform:rotate(20deg);
   gap:24px;
 }
-.art-cyber-simulation .art-diagram:before {
+.art-puerto-dataspace-edc .art-diagram:before {
   content:"";
   position:absolute;
   width:90%;
   border-top:1px dashed currentColor;
   opacity:.35;
 }
-.art-cyber-simulation .art-diagram span {
+.art-puerto-dataspace-edc .art-diagram span {
   border-radius:50%;
   background:var(--soft);
   opacity:1;
   border-color:var(--border);
   z-index:1;
 }
-.art-cyber-simulation .art-diagram span:nth-child(even) {
+.art-puerto-dataspace-edc .art-diagram span:nth-child(even) {
   transform:translateY(35px);
 }
 .project-info {
@@ -711,5 +711,76 @@ button[hidden] {
   }
 }
 .tags li {
+  color:var(--text);
+}
+.project-sections {
+  margin-bottom:40px;
+}
+.technical-section {
+  border-top:1px solid var(--border);
+}
+.technical-section summary {
+  padding:24px 0;
+  cursor:pointer;
+}
+.technical-section summary h2 {
+  display:inline;
+  font-size:clamp(20px,3vw,27px);
+  font-weight:550;
+}
+.technical-content {
+  padding-bottom:28px;
+  max-width:900px;
+  color:var(--muted);
+  font-size:15px;
+}
+.technical-content li {
+  margin-top:12px;
+  line-height:1.8;
+}
+.technical-content p,.technical-content li,.evidence-links a {
+  overflow-wrap:anywhere;
+}
+.evidence-links {
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px 24px;
+  margin-top:24px;
+  font-size:12px;
+}
+.evidence-links a {
+  max-width:100%;
+  text-decoration:underline;
+  text-underline-offset:4px;
+}
+.comparison-scroll {
+  overflow-x:auto;
+  margin-top:24px;
+}
+.comparison-scroll:focus-visible {
+  outline:2px solid var(--text);
+  outline-offset:4px;
+}
+.comparison-scroll table {
+  width:100%;
+  min-width:640px;
+  border-collapse:collapse;
+  font-size:13px;
+  line-height:1.7;
+}
+.comparison-scroll caption {
+  text-align:left;
+  margin-bottom:12px;
+  font-weight:600;
+  color:var(--text);
+}
+.comparison-scroll th,.comparison-scroll td {
+  text-align:left;
+  vertical-align:top;
+  padding:16px 12px;
+  border-bottom:1px solid var(--border);
+}
+.comparison-scroll th {
+  font-weight:600;
   color:var(--text);
 }

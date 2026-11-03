@@ -2,6 +2,8 @@
 
 Portfolio estático bilingüe con Astro, TypeScript estricto y CSS nativo. Español en `/` e inglés en `/en/`. Sin backend ni frameworks de interfaz adicionales.
 
+Perfil: **Ingeniero del Software | Full-stack Developer** / **Software Engineer | Full-stack Developer**. Tres proyectos destacados, en este orden: **DISTANS**, **Puerto Dataspace EDC** y **AURA**. Se mantienen ocho páginas estáticas; el simulador de ciberataques ya no se publica.
+
 ## Requisitos y desarrollo
 
 Node.js **22.23.4 o posterior dentro de la rama 22**, npm y Git. Astro **7.4.5**, verificado con Node **22.23.4**. `.nvmrc` fija esa versión. Node 20.11 no es compatible; en Vercel selecciona **22.x** con parche al menos **22.23.4**.
@@ -27,7 +29,7 @@ Abre la dirección que imprime Astro, normalmente `http://localhost:4321`.
 
 ```text
 src/
-  components/   Home, Header, Footer, SocialLinks, ProjectArt, ProjectDetail
+  components/   Home, Header, Footer, SocialLinks, ProjectArt, ProjectDetail, ProjectSections
   layouts/      BaseLayout: documento, SEO y estructura común
   data/         profile.ts y projects.ts
   i18n/         ui.ts: interfaz y tipo Locale
@@ -45,9 +47,9 @@ docs/           Informes de seguridad y preparación de producción
 
 Edita `src/i18n/ui.ts` para los textos de interfaz en ambos idiomas. El contenido de proyectos está en `src/data/projects.ts`, tipado mediante `Project` y `Record<Locale, ProjectContent>`. Astro configura los idiomas en `astro.config.mjs`.
 
-Para añadir un proyecto, incorpora un objeto con slug único, etiquetas y contenido completo en `es` y `en`. Las dos rutas `[slug].astro` usan `getStaticPaths()` para generar las páginas automáticamente. El selector conserva el proyecto equivalente y el fragmento de sección. Añade `repository` y `website` únicamente con URLs reales; `results` es opcional y debe contener resultados documentados.
+Para añadir un proyecto, incorpora un objeto con slug único, etiquetas y contenido completo en `es` y `en`. Las dos rutas `[slug].astro` usan `getStaticPaths()` para generar las páginas automáticamente. El selector conserva el proyecto equivalente y el fragmento de sección. Añade `repository` y `website` únicamente con URLs reales; `results` es opcional y debe contener resultados documentados. `technologies` permite ampliar las etiquetas de la ficha; `sections` añade apartados desplegables con fuentes; `comparison` contiene la tabla Django/FastAPI. Cada idioma incluye `evidenceNote` para explicar el alcance de la verificación.
 
-Las ilustraciones son placeholders geométricos en CSS. Los retos describen áreas técnicas del alcance conocido, sin atribuir decisiones internas ni resultados no aportados. Completa las fichas con documentación verificable antes de presentarlas como casos técnicos exhaustivos.
+Las ilustraciones geométricas CSS se etiquetan como conceptuales; no son capturas ni documentación real de los sistemas. DISTANS reúne ambas implementaciones y enlaza el código FastAPI inspeccionado; Django se limita al alcance aportado por el propietario. Puerto EDC explica un demostrador local con datos mock y condiciones de acceso de la demo. AURA distingue alcance declarado de implementación pendiente de confirmar. Las fuentes fijadas a commits, limitaciones y datos pendientes están en [docs/project-evidence.md](docs/project-evidence.md). No se ejecutaron las aplicaciones externas ni sus suites de pruebas.
 
 ## Enlaces personales y CV
 
@@ -96,3 +98,5 @@ Se completó la migración controlada **Astro 5.18.2 → 6.4.8 → 7.4.5** en `c
 Se conservaron íntegramente los componentes, configuración, diseño y datos personales. La regresión vuelve a pasar: tests, tipos, build, verificación de dist y los 80 casos de navegador. El [informe de seguridad](docs/security-audit.md) detalla versiones y auditorías; el [informe de preparación](docs/production-readiness.md) recoge las pruebas y pasos de publicación. El resultado es apto técnicamente para despliegue estático con Node compatible y `SITE_URL` auténtico; no se ha desplegado. Una auditoría sin avisos no garantiza ausencia de vulnerabilidades desconocidas.
 
 Pendiente de aportar: email, perfiles sociales, repositorios, CV, dominio y detalles internos/resultados documentados de proyectos. Estos datos no se han inventado.
+
+Los repositorios públicos confirmados de DISTANS FastAPI y Puerto Dataspace EDC sí están configurados en sus fichas. Siguen pendientes el repositorio Django, el de AURA y la confirmación de funciones implementadas frente a previstas de AURA. Las pruebas de build comprueban selección, orden, enlaces públicos y ausencia del proyecto retirado; las de navegador abren los apartados técnicos para comprobar también su contenido responsive.
