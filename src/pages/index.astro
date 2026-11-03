@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Home from '../components/Home.astro';
+import { copy } from '../lib/content';
+const t = copy.es;
+---
+<BaseLayout locale="es" title="Alberto Paleteiro | Ingeniero del Software" description={t.intro}>
+  <Home locale="es" />
+</BaseLayout>

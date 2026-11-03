@@ -1,0 +1,58 @@
+---
+import { copy, profile, projects, type Locale } from '../lib/content';
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = copy[locale];
+const home = locale === 'es' ? '/' : '/en/';
+const alternate = locale === 'es' ? '/en/' : '/';
+---
+<div class="site-shell">
+  <header class="header wrap">
+    <a class="logo" href={home} aria-label="Inicio">AP<span class="dot">.</span></a>
+    <nav aria-label={locale === 'es' ? 'Principal' : 'Main'}>
+      <a href="#projects">{t.projects}</a>
+      <a href="#about">{t.about}</a>
+      <a href="#contact">{t.contact}</a>
+      <a class="locale" href={alternate} lang={locale === 'es' ? 'en' : 'es'} aria-label={t.switchLanguage}>{locale === 'es' ? 'EN' : 'ES'} ↗</a>
+    </nav>
+  </header>
+  <main>
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="eyebrow"><span class="status" aria-hidden="true"></span>{t.role}</div>
+      <h1 id="hero-title">{t.greeting}<br /><span>{t.headline}</span></h1>
+      <p class="hero-description">{t.intro}</p>
+      <div class="actions">
+        <a class="button primary" href="#projects">{t.viewProjects} <span aria-hidden="true">↗</span></a>
+        <a class="button secondary" href="#contact">{t.contact}</a>
+      </div>
+    </section>
+    <section class="section wrap" id="projects" aria-labelledby="projects-title">
+      <div class="section-heading"><span class="section-number">01 /</span><h2 id="projects-title">{t.featured}</h2></div>
+      <div class="project-grid">
+        {projects.map((project, index) => (
+          <article class="project-card">
+            <div class="project-art" aria-hidden="true"><span class="art-mark">{String(index + 1).padStart(2, '0')}</span><span class="art-name">{project.title}</span></div>
+            <div class="project-info"><h3>{project.title}</h3><p>{project.description[locale]}</p>
+              <ul class="tags" aria-label="Technologies">{project.tags.map((tag) => <li>{tag}</li>)}</ul>
+              {project.repository && <a class="project-link" href={project.repository} target="_blank" rel="noopener noreferrer">{t.source} ↗</a>}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+    <section class="section wrap about-section" id="about" aria-labelledby="about-title">
+      <div class="section-heading"><span class="section-number">02 /</span><h2 id="about-title">{t.aboutTitle}</h2></div>
+      <p>{t.aboutText}</p>
+    </section>
+    <section class="section wrap contact-section" id="contact" aria-labelledby="contact-title">
+      <div class="section-heading"><span class="section-number">03 /</span><h2 id="contact-title">{t.contactTitle}</h2></div>
+      <p>{t.contactText}</p>
+      <div class="social-links">
+        {profile.email && <a href={`mailto:${profile.email}`}>{t.mail} ↗</a>}
+        {profile.github && <a href={profile.github} target="_blank" rel="noopener noreferrer">GitHub ↗</a>}
+        {profile.linkedin && <a href={profile.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>}
+      </div>
+    </section>
+  </main>
+  <footer class="footer wrap"><span>© {new Date().getFullYear()} {profile.name}</span><span>{t.footer}</span></footer>
+</div>
