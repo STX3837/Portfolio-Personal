@@ -2,5 +2,13 @@
 import { copy, type Locale } from '../i18n/ui';
 interface Props { slug: string; index?: number; locale: Locale }
 const { slug, index = 0, locale } = Astro.props;
+const labels = {
+  es: { distans: ['Comercios', 'Catálogo', 'Pedido'], 'puerto-dataspace-edc': ['Providers', 'Acceso EDC', 'Consumer'], aura: ['Preferencias', 'Itinerario', 'Destinos'] },
+  en: { distans: ['Local shops', 'Catalogue', 'Order'], 'puerto-dataspace-edc': ['Providers', 'EDC access', 'Consumer'], aura: ['Preferences', 'Itinerary', 'Destinations'] },
+};
+const steps = labels[locale][slug as keyof typeof labels.es] ?? [];
 ---
-<div class={`project-art art-${slug}`} aria-hidden="true"><span class="art-mark">0{index + 1} / {copy[locale].concept}</span><div class="art-diagram"><span></span><span></span><span></span><span></span><span></span></div><span class="art-caption">{slug === 'distans' ? 'DISTANS' : slug === 'aura' ? 'AURA' : 'EDC / DATA'}</span></div>
+<figure class={`project-art art-${slug}`}>
+  <figcaption><span class="art-mark">0{index + 1} / {copy[locale].concept}</span><span class="art-caption">{slug === 'distans' ? 'DISTANS' : slug === 'aura' ? 'AURA' : 'EDC / DATA'}</span></figcaption>
+  <ol class="concept-flow">{steps.map((step, stepIndex) => <li><span class="concept-node" aria-hidden="true">{String(stepIndex + 1).padStart(2, '0')}</span><span>{step}</span></li>)}</ol>
+</figure>

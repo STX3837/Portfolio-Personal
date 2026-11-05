@@ -1,34 +1,23 @@
 ---
 import type { ProjectContent } from '../data/projects';
 import { copy, type Locale } from '../i18n/ui';
-interface Props { content: ProjectContent; locale: Locale }
-const { content, locale } = Astro.props;
+interface Props { content: ProjectContent; locale: Locale; technologies: string[] }
+const { content, locale, technologies } = Astro.props;
 const t = copy[locale];
+const sources = [...new Map([...(content.references ?? []), ...(content.sections ?? []).flatMap(section => section.sources)].map(source => [source.href, source])).values()];
 ---
 <div class="project-sections">
-  {content.sections?.map(section => (
-    <details class="technical-section">
-      <summary><h2>{section.title}</h2></summary>
-      <div class="technical-content">
-        {section.paragraphs.map(paragraph => <p>{paragraph}</p>)}
-        <ul>{section.items.map(item => <li>{item}</li>)}</ul>
-        {section.sources.length > 0 && <nav class="evidence-links" aria-label={`${t.sources}: ${section.title}`}>
-          {section.sources.map(source => <a href={source.href} target="_blank" rel="noopener noreferrer">{source.label} ↗</a>)}
-        </nav>}
-      </div>
-    </details>
-  ))}
-  {content.comparison && <details class="technical-section">
-    <summary><h2>{content.comparison.title}</h2></summary>
-    <div class="technical-content">
-      <p>{content.comparison.note}</p>
-      <div class="comparison-scroll" tabindex="0" role="region" aria-label={content.comparison.title}>
-        <table>
-          <caption>{content.comparison.title}</caption>
-          <thead><tr><th scope="col">{t.comparisonTopic}</th><th scope="col">{t.djangoVersion}</th><th scope="col">{t.fastapiVersion}</th></tr></thead>
-          <tbody>{content.comparison.rows.map(row => <tr><th scope="row">{row.topic}</th><td>{row.django}</td><td>{row.fastapi}</td></tr>)}</tbody>
-        </table>
-      </div>
+  <details class="technical-section">
+    <summary><h2>{t.technicalDetails}</h2></summary>
+    <div class="technical-content supplemental-grid">
+      <section><h3>{t.architecture}</h3><ul>{content.architecture.map(item => <li>{item}</li>)}</ul></section>
+      <section><h3>{content.featuresTitle ?? t.features}</h3><ul>{content.features.map(item => <li>{item}</li>)}</ul></section>
+      {content.sections?.map(section => <section><h3>{section.title}</h3>{section.paragraphs.map(paragraph => <p>{paragraph}</p>)}<ul>{section.items.map(item => <li>{item}</li>)}</ul></section>)}
+      <section><h3>{t.fullStack}</h3><ul class="tags">{technologies.map(item => <li>{item}</li>)}</ul></section>
     </div>
+  </details>
+  {sources.length > 0 && <details class="technical-section technical-references">
+    <summary><h2>{t.references}</h2></summary>
+    <nav class="technical-content evidence-links" aria-label={t.references}>{sources.map(source => <a href={source.href} target="_blank" rel="noopener noreferrer">{source.label} ↗</a>)}</nav>
   </details>}
 </div>

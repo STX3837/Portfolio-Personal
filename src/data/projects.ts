@@ -2,14 +2,22 @@ import type { Locale } from '../i18n/ui';
 export interface EvidenceLink { label: string; href: string }
 export interface ProjectSection { title: string; paragraphs: string[]; items: string[]; sources: EvidenceLink[] }
 export interface ProjectComparison { title: string; note: string; rows: { topic: string; django: string; fastapi: string }[] }
+export interface ProjectImplementation {
+ name: string; repository: string; architecture: string; persistence: string; frontend: string; highlights: string[];
+}
+export interface ConcurrencyCase {
+ title: string; intro: string; diagram: string[]; strategies: { name: string; steps: string[] }[]; note: string;
+}
 export interface ProjectContent {
  title: string; description: string; problem: string; solution: string;
  features: string[]; architecture: string[]; challenges: string[]; results?: string[];
  evidenceNote: string; sections?: ProjectSection[]; comparison?: ProjectComparison;
  featuresTitle?: string; solutionTitle?: string;
+ keyPoints?: { title: string; text: string }[]; implementations?: ProjectImplementation[];
+ concurrency?: ConcurrencyCase; testing?: string; conclusion?: string; references?: EvidenceLink[];
 }
 export interface Project {
- slug: string; tags: string[]; technologies?: string[]; repository?: string; website?: string;
+ slug: string; tags: string[]; repositories?: EvidenceLink[]; technologies?: string[]; repository?: string; website?: string;
  content: Record<Locale, ProjectContent>;
 }
 export const projects: Project[] = [
@@ -18,7 +26,7 @@ export const projects: Project[] = [
     "tags": [
       "Django",
       "FastAPI",
-      "PostGIS",
+      "PostgreSQL",
       "Stripe"
     ],
     "repository": "https://github.com/STX3837/Distans-FastAPI",
@@ -41,364 +49,452 @@ export const projects: Project[] = [
       "es": {
         "title": "DISTANS",
         "description": "Marketplace geolocalizado de comercio de proximidad, con implementaciones en Django y FastAPI.",
-        "problem": "Conectar comercios cercanos con compradores y coordinar catálogo, disponibilidad, pedidos y pagos en una experiencia de compra coherente.",
-        "solution": "Dos implementaciones del mismo dominio: una versión Django y una versión FastAPI con páginas Jinja2 y endpoints JSON. Una única ficha permite explorar qué se conoce de cada una.",
+        "problem": "Comprar cerca debería ser sencillo. El reto es reunir comercios, catálogo y pagos sin perder la consistencia del stock durante una compra.",
+        "solution": "Un marketplace desarrollado en dos versiones: Django y FastAPI. Ambas conectan compradores y comercios, con catálogo geolocalizado, carrito, pedidos y pagos con Stripe.",
         "features": [
-          "Usuarios y roles, comercios y productos",
-          "Geolocalización con PostgreSQL y PostGIS",
-          "Catálogo, carrito y pedidos",
-          "Pagos con Stripe y reserva de stock"
+          "Descubrimiento de comercios por ubicación",
+          "Carrito y pedidos por tienda",
+          "Pagos y reservas de stock"
         ],
         "architecture": [
-          "FastAPI: routers por dominio, modelos SQLAlchemy y esquemas Pydantic separados.",
-          "Jinja2 sirve HTML; JavaScript consume endpoints JSON. No es una SPA.",
-          "PostgreSQL/PostGIS para persistencia y consultas geográficas; sesiones de base de datos mediante dependencia get_db."
+          "Django organiza el dominio en apps; las vistas de carrito están en products/views.py y sus modelos en carts/.",
+          "FastAPI separa routers, esquemas Pydantic, modelos SQLAlchemy y módulos de negocio.",
+          "Ambas generan HTML en el servidor con JavaScript para interacciones; no son SPA."
         ],
         "challenges": [
-          "Coordinar disponibilidad, creación del pedido y pago externo.",
-          "Evitar reservas repetidas al reintentar una compra.",
-          "Mantener consistencia entre el pedido y el carrito cuando este cambia durante el pago."
+          "Reservar stock sin que dos compras consuman las mismas unidades.",
+          "Coordinar transacciones locales con un pago externo que puede fallar o repetirse.",
+          "Mantener precio, carrito y estado del pedido coherentes durante el checkout."
         ],
-        "evidenceNote": "FastAPI: inspección estática de código y documentación públicos. Django: alcance aportado por el propietario, sin repositorio inspeccionado. No he ejecutado Pytest ni Locust ni reproducido pruebas de concurrencia; no se publican comparativas de rendimiento.",
-        "sections": [
-          {
-            "title": "Implementación Django",
-            "paragraphs": [
-              "El propietario describe una aplicación con Django y Python, PostgreSQL/PostGIS y Stripe."
-            ],
-            "items": [
-              "Usuarios y roles; comercios y productos; geolocalización y catálogo.",
-              "Carrito, pagos, gestión de pedidos y reserva de stock.",
-              "Sin acceso al repositorio Django: no se atribuyen mecanismos concretos de autenticación, validación, bloqueo o pruebas."
-            ],
-            "sources": []
-          },
-          {
-            "title": "Implementación FastAPI",
-            "paragraphs": [
-              "El código separa rutas HTML y API por dominio, lógica compartida, modelos y esquemas. El backend renderiza páginas y atiende peticiones JSON."
-            ],
-            "items": [
-              "FastAPI, SQLAlchemy 2 y Pydantic 2; interfaz Jinja2 y JavaScript.",
-              "Sesiones firmadas de Starlette, contraseñas PBKDF2-SHA256 y controles CSRF, rol y propiedad.",
-              "Stripe Checkout, webhooks firmados y reconciliación de reservas.",
-              "Docker Compose para desarrollo; Pytest y escenarios Locust presentes."
-            ],
-            "sources": [
-              {
-                "label": "main.py",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/main.py"
-              },
-              {
-                "label": "app/routers/auth.py",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/routers/auth.py"
-              },
-              {
-                "label": "app/security.py",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/security.py"
-              },
-              {
-                "label": "requirements.txt",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/requirements.txt"
-              }
-            ]
-          },
-          {
-            "title": "Concurrencia: la última unidad",
-            "paragraphs": [
-              "Si dos compradores leen una unidad disponible, una lectura previa no basta para que ambos puedan reservarla. La versión FastAPI comprueba la disponibilidad dentro de la actualización de stock."
-            ],
-            "items": [
-              "finalizar_compra ejecuta UPDATE condicionado por producto disponible y stock suficiente; comprueba rowcount == 1.",
-              "Si no se actualiza una fila, rollback revierte la reserva de la operación y se responde con conflicto HTTP 409. Pedido y líneas se confirman antes de contactar con Stripe.",
-              "with_for_update bloquea pedidos existentes; no se presenta como un bloqueo previo de productos inexistentes. La reserva del producto usa la actualización condicional.",
-              "El código de pedido deriva del token de compra y es único. Ante IntegrityError se revierte la transacción y se recupera el pedido ya creado.",
-              "Stripe usa una clave de idempotencia; la liberación comprueba reserva_liberada. Son mecanismos inspeccionados, no una garantía de concurrencia demostrada mediante ensayos propios."
-            ],
-            "sources": [
-              {
-                "label": "Compra y reserva condicional",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/routers/compra.py#L146-L198"
-              },
-              {
-                "label": "Restricciones de pedido",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/models.py#L345-L375"
-              },
-              {
-                "label": "Idempotencia y liberación",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/stripe_payments.py#L56-L80"
-              }
-            ]
-          },
-          {
-            "title": "Pruebas y mantenibilidad",
-            "paragraphs": [
-              "El repositorio contiene pruebas de compra, control de acceso, pagos y liberación de reservas, además de escenarios de carga."
-            ],
-            "items": [
-              "Las pruebas de compra verifican reintentos idempotentes y rechazo al cambiar precio, stock o disponibilidad.",
-              "La configuración de Pytest usa SQLite en memoria: su presencia no prueba bloqueos o aislamiento bajo PostgreSQL concurrente.",
-              "Routers, esquemas, modelos y pagos separados facilitan localizar responsabilidades. La comparación con Django no atribuye una superioridad de mantenibilidad.",
-              "Hay artefactos de carga en el repositorio, pero no se utilizan para afirmar rendimiento sin demostrar condiciones equivalentes."
-            ],
-            "sources": [
-              {
-                "label": "tests/test_compra_directa.py",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/tests/test_compra_directa.py"
-              },
-              {
-                "label": "tests/test_stripe_payments.py",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/tests/test_stripe_payments.py"
-              },
-              {
-                "label": "tests/conftest.py",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/tests/conftest.py"
-              },
-              {
-                "label": "load_tests/locustfile.py",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/load_tests/locustfile.py"
-              }
-            ]
-          }
-        ],
+        "evidenceNote": "Fuentes de ambos repositorios fijadas a commits en Referencias técnicas.",
+        "sections": [],
         "comparison": {
-          "title": "Mismo problema, dos implementaciones",
-          "note": "La columna Django distingue capacidades generales del framework de los detalles pendientes de verificar. FastAPI describe decisiones observadas en este repositorio, no ventajas automáticas del framework.",
+          "title": "Comparativa técnica",
+          "note": "Decisiones verificadas en ambas implementaciones del marketplace.",
           "rows": [
             {
-              "topic": "Arquitectura",
-              "django": "Django es un framework integrado; la estructura concreta del proyecto no está verificada.",
-              "fastapi": "Routers, esquemas, modelos y lógica compartida separados."
+              "topic": "Organización",
+              "django": "Apps con modelos, vistas y formularios.",
+              "fastapi": "Routers, modelos SQLAlchemy y esquemas separados."
             },
             {
-              "topic": "Organización del backend",
-              "django": "Django permite organizar por apps; organización real pendiente.",
-              "fastapi": "app/routers por dominio y módulos compartidos en app/."
+              "topic": "HTTP y frontend",
+              "django": "URLconf, vistas y Django Templates.",
+              "fastapi": "APIRouter, dependencias, Jinja2 y JSON."
             },
             {
-              "topic": "Rutas y peticiones",
-              "django": "Django dispone de URLs y vistas; rutas reales pendientes.",
-              "fastapi": "APIRouter, dependencias, HTML Jinja2 y endpoints JSON."
-            },
-            {
-              "topic": "ORM y persistencia",
-              "django": "Django incluye ORM; uso concreto pendiente. PostgreSQL/PostGIS aportados por el propietario.",
-              "fastapi": "SQLAlchemy 2, sesiones get_db y modelos relacionales/geográficos."
+              "topic": "Persistencia",
+              "django": "ORM Django, relaciones y migraciones por app.",
+              "fastapi": "SQLAlchemy 2, get_db y migrador incremental propio."
             },
             {
               "topic": "Validación",
-              "django": "Django ofrece formularios y validadores; implementación pendiente.",
-              "fastapi": "Modelos y validadores Pydantic 2, además de comprobaciones de negocio."
+              "django": "Forms, ModelForms y validadores de modelos.",
+              "fastapi": "Pydantic 2 y comprobaciones de negocio."
             },
             {
-              "topic": "Autenticación",
-              "django": "Django incluye autenticación; configuración del proyecto no inspeccionada.",
-              "fastapi": "Sesiones firmadas, PBKDF2-SHA256, CSRF y comprobaciones de rol/propiedad."
+              "topic": "Acceso",
+              "django": "Auth y sesiones Django; comprobaciones de rol y tienda.",
+              "fastapi": "Sesiones Starlette, CSRF y controles de rol/propiedad."
             },
             {
-              "topic": "Transacciones",
-              "django": "El propietario confirma reserva de stock; mecanismo interno sin verificar.",
-              "fastapi": "UPDATE condicional, rowcount, rollback, códigos únicos y bloqueos de pedidos."
+              "topic": "Geolocalización",
+              "django": "Haversine en Python; radio en kilómetros.",
+              "fastapi": "Haversine en Python; radio en metros. Modelo Geometry declarado."
             },
             {
-              "topic": "Integraciones",
-              "django": "Geolocalización y Stripe confirmados por el propietario.",
-              "fastapi": "PostGIS, Stripe Checkout, webhook firmado y correo local documentado."
+              "topic": "Stock y transacción",
+              "django": "atomic + select_for_update sobre productos.",
+              "fastapi": "UPDATE condicional + rowcount + commit/rollback."
+            },
+            {
+              "topic": "Reintentos",
+              "django": "Código único, pago previo en sesión y clave Stripe por pedido. No equivale a deduplicar solicitudes simultáneas de checkout.",
+              "fastapi": "Token de compra único, IntegrityError y clave Stripe."
+            },
+            {
+              "topic": "Pagos",
+              "django": "Checkout y webhook firmado; reserva y liberación bajo bloqueo.",
+              "fastapi": "Checkout y webhook firmado; reconciliación de reservas."
             },
             {
               "topic": "Pruebas",
-              "django": "Suite y cobertura no disponibles.",
-              "fastapi": "Archivos Pytest y Locust inspeccionados; no ejecutados en esta revisión."
-            },
-            {
-              "topic": "Mantenibilidad",
-              "django": "No se infiere calidad de implementación a partir del framework.",
-              "fastapi": "Separación de responsabilidades observada; sin métricas comparativas."
+              "django": "Tests Django; caso concurrente condicionado a PostgreSQL.",
+              "fastapi": "Pytest con SQLite en memoria y escenarios Locust."
             }
           ]
-        }
+        },
+        "implementations": [
+          {
+            "name": "Django",
+            "repository": "https://github.com/STX3837/Distans-Django",
+            "architecture": "Apps por dominio: users, stores, products, carts y orders.",
+            "persistence": "Django ORM · PostgreSQL / PostGIS",
+            "frontend": "Django Templates · JavaScript",
+            "highlights": [
+              "Formularios Django y autenticación integrada.",
+              "Bloqueo de productos antes de reservar stock."
+            ]
+          },
+          {
+            "name": "FastAPI",
+            "repository": "https://github.com/STX3837/Distans-FastAPI",
+            "architecture": "Routers por dominio, modelos y esquemas separados.",
+            "persistence": "SQLAlchemy 2 · PostgreSQL / PostGIS",
+            "frontend": "Jinja2 · JavaScript",
+            "highlights": [
+              "Validación con Pydantic 2 y sesiones firmadas.",
+              "Reserva mediante actualización condicional."
+            ]
+          }
+        ],
+        "concurrency": {
+          "title": "Dos compradores. Una última unidad.",
+          "intro": "Si ambos leen el mismo stock antes de reservar, podrían intentar comprar la misma unidad. La disponibilidad debe comprobarse dentro de la operación que modifica el inventario.",
+          "diagram": [
+            "Comprador A",
+            "1 unidad disponible",
+            "Comprador B"
+          ],
+          "strategies": [
+            {
+              "name": "Django",
+              "steps": [
+                "transaction.atomic() agrupa validación, pedido y descuento.",
+                "select_for_update() bloquea productos ordenados por pk; se releen stock y precio bajo bloqueo.",
+                "Se guarda el nuevo stock. Una excepción revierte el bloque atómico; la liberación usa F() y un pedido bloqueado."
+              ]
+            },
+            {
+              "name": "FastAPI",
+              "steps": [
+                "UPDATE exige producto disponible y stock suficiente antes de descontar.",
+                "rowcount confirma una fila modificada; si no, rollback y HTTP 409.",
+                "La unicidad del código derivado del token y la recuperación tras IntegrityError gestionan reintentos; with_for_update bloquea pedidos existentes, no la lectura de productos."
+              ]
+            }
+          ],
+          "note": "El esquema representa una situación de compra. Los bloqueos de filas requieren una base de datos compatible, como PostgreSQL."
+        },
+        "testing": "Ambos repositorios incluyen pruebas de compras y pagos. Django contiene un TransactionTestCase concurrente que solo se ejecuta con PostgreSQL; su configuración portable y la de Pytest usan SQLite. Hay escenarios Locust y artefactos de carga, pero no se han ejecutado aquí ni se presentan como ensayos equivalentes.",
+        "conclusion": "Dos formas de resolver un mismo dominio, trabajando el desarrollo full-stack, la arquitectura del backend, la persistencia, la integración de servicios, la consistencia de datos y la calidad del software.",
+        "references": [
+          {
+            "label": "Django · nucleo/urls.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/nucleo/urls.py"
+          },
+          {
+            "label": "Django · users/forms.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/users/forms.py"
+          },
+          {
+            "label": "Django · products/views.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/products/views.py"
+          },
+          {
+            "label": "Django · orders/utils.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/orders/utils.py"
+          },
+          {
+            "label": "Django · orders/models.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/orders/models.py"
+          },
+          {
+            "label": "Django · orders/views.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/orders/views.py"
+          },
+          {
+            "label": "Django · stores/utils.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/stores/utils.py"
+          },
+          {
+            "label": "Django · orders/test_payment_safety.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/orders/test_payment_safety.py"
+          },
+          {
+            "label": "Django · nucleo/settings_test.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/nucleo/settings_test.py"
+          },
+          {
+            "label": "FastAPI · main.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/main.py"
+          },
+          {
+            "label": "FastAPI · app/database.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/database.py"
+          },
+          {
+            "label": "FastAPI · app/schemas.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/schemas.py"
+          },
+          {
+            "label": "FastAPI · app/routers/auth.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/routers/auth.py"
+          },
+          {
+            "label": "FastAPI · app/routers/catalogo.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/routers/catalogo.py"
+          },
+          {
+            "label": "FastAPI · app/routers/compra.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/routers/compra.py"
+          },
+          {
+            "label": "FastAPI · app/models.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/models.py"
+          },
+          {
+            "label": "FastAPI · app/stripe_payments.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/stripe_payments.py"
+          },
+          {
+            "label": "FastAPI · tests/conftest.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/tests/conftest.py"
+          },
+          {
+            "label": "FastAPI · tests/test_compra_directa.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/tests/test_compra_directa.py"
+          },
+          {
+            "label": "FastAPI · tests/test_stripe_payments.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/tests/test_stripe_payments.py"
+          },
+          {
+            "label": "FastAPI · load_tests/locustfile.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/load_tests/locustfile.py"
+          }
+        ]
       },
       "en": {
         "title": "DISTANS",
         "description": "A geolocated local-commerce marketplace with Django and FastAPI implementations.",
-        "problem": "Connect nearby shops with shoppers while coordinating catalogues, availability, orders, and payments in a coherent shopping experience.",
-        "solution": "Two implementations of the same domain: a Django version and a FastAPI version serving Jinja2 pages and JSON endpoints. One case study distinguishes what is known about each.",
+        "problem": "Shopping locally should be straightforward. The challenge is bringing shops, catalogues, and payments together while keeping stock consistent during a purchase.",
+        "solution": "A marketplace built in two versions: Django and FastAPI. Both connect shoppers and local businesses through a location-aware catalogue, cart, orders, and Stripe payments.",
         "features": [
-          "Users and roles, shops and products",
-          "Geolocation with PostgreSQL and PostGIS",
-          "Catalogue, cart, and orders",
-          "Stripe payments and stock reservation"
+          "Shop discovery by location",
+          "Cart and store-specific orders",
+          "Payments and stock reservations"
         ],
         "architecture": [
-          "FastAPI: domain routers, SQLAlchemy models, and separate Pydantic schemas.",
-          "Jinja2 serves HTML; JavaScript consumes JSON endpoints. This is not a SPA.",
-          "PostgreSQL/PostGIS for persistence and geographic queries; database sessions through the get_db dependency."
+          "Django organises the domain into apps; cart views live in products/views.py and cart models in carts/.",
+          "FastAPI separates routers, Pydantic schemas, SQLAlchemy models, and business modules.",
+          "Both render server-side HTML and use JavaScript for interactions; neither is a SPA."
         ],
         "challenges": [
-          "Coordinating availability, order creation, and an external payment service.",
-          "Avoiding repeated reservations when a purchase is retried.",
-          "Keeping orders and carts consistent when a cart changes during payment."
+          "Reserving stock without two purchases consuming the same units.",
+          "Coordinating local transactions with external payments that may fail or be retried.",
+          "Keeping prices, carts, and order states consistent throughout checkout."
         ],
-        "evidenceNote": "FastAPI: static inspection of public code and documentation. Django: owner-provided scope, without an inspected repository. I have not run Pytest or Locust or reproduced concurrency tests; no performance comparisons are published.",
-        "sections": [
-          {
-            "title": "Django implementation",
-            "paragraphs": [
-              "The owner describes a Django/Python application using PostgreSQL/PostGIS and Stripe."
-            ],
-            "items": [
-              "Users and roles; shops and products; geolocation and catalogue.",
-              "Cart, payments, order management, and stock reservation.",
-              "Without the Django repository, specific authentication, validation, locking, and testing mechanisms remain unverified."
-            ],
-            "sources": []
-          },
-          {
-            "title": "FastAPI implementation",
-            "paragraphs": [
-              "The code separates HTML/API routes by domain from shared logic, models, and schemas. The backend renders pages and handles JSON requests."
-            ],
-            "items": [
-              "FastAPI, SQLAlchemy 2, and Pydantic 2; a Jinja2 and JavaScript interface.",
-              "Signed Starlette sessions, PBKDF2-SHA256 passwords, CSRF, and role/ownership checks.",
-              "Stripe Checkout, signed webhooks, and reservation reconciliation.",
-              "Docker Compose for development; Pytest and Locust scenarios are present."
-            ],
-            "sources": [
-              {
-                "label": "main.py",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/main.py"
-              },
-              {
-                "label": "app/routers/auth.py",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/routers/auth.py"
-              },
-              {
-                "label": "app/security.py",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/security.py"
-              },
-              {
-                "label": "requirements.txt",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/requirements.txt"
-              }
-            ]
-          },
-          {
-            "title": "Concurrency: the last unit",
-            "paragraphs": [
-              "When two shoppers read one available unit, an earlier read alone cannot guarantee a reservation. The FastAPI implementation checks availability as part of its stock update."
-            ],
-            "items": [
-              "finalizar_compra issues a conditional UPDATE requiring an available product and sufficient stock, then checks rowcount == 1.",
-              "If no row is updated, rollback reverses the operation’s reservation and the request receives HTTP 409. Orders and lines are committed before contacting Stripe.",
-              "with_for_update locks existing orders; it is not presented as locking absent products in advance. Product reservation uses the conditional update.",
-              "The order code derives from the purchase token and is unique. IntegrityError triggers rollback and retrieval of the existing order.",
-              "Stripe receives an idempotency key; release checks reserva_liberada. These are inspected mechanisms, not concurrency guarantees demonstrated by my own tests."
-            ],
-            "sources": [
-              {
-                "label": "Purchase and conditional reservation",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/routers/compra.py#L146-L198"
-              },
-              {
-                "label": "Order constraints",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/models.py#L345-L375"
-              },
-              {
-                "label": "Idempotency and release",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/stripe_payments.py#L56-L80"
-              }
-            ]
-          },
-          {
-            "title": "Testing and maintainability",
-            "paragraphs": [
-              "The repository contains tests for purchases, access control, payments, and reservation release, alongside load scenarios."
-            ],
-            "items": [
-              "Purchase tests cover idempotent retries and rejection when price, stock, or availability changes.",
-              "The Pytest configuration uses in-memory SQLite: these files do not demonstrate concurrent PostgreSQL locking or isolation.",
-              "Separate routers, schemas, models, and payment modules make responsibilities easier to locate. No maintainability superiority over Django is claimed.",
-              "Load artefacts exist, but no performance conclusions are drawn without establishing equivalent conditions."
-            ],
-            "sources": [
-              {
-                "label": "tests/test_compra_directa.py",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/tests/test_compra_directa.py"
-              },
-              {
-                "label": "tests/test_stripe_payments.py",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/tests/test_stripe_payments.py"
-              },
-              {
-                "label": "tests/conftest.py",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/tests/conftest.py"
-              },
-              {
-                "label": "load_tests/locustfile.py",
-                "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/load_tests/locustfile.py"
-              }
-            ]
-          }
-        ],
+        "evidenceNote": "Sources from both repositories are pinned to commits under Technical references.",
+        "sections": [],
         "comparison": {
-          "title": "Same problem, two implementations",
-          "note": "The Django column separates general framework capabilities from unverified project details. FastAPI describes observed repository decisions, not automatic framework advantages.",
+          "title": "Technical comparison",
+          "note": "Verified decisions in both marketplace implementations.",
           "rows": [
             {
-              "topic": "Architecture",
-              "django": "Django is an integrated framework; this project’s structure has not been verified.",
-              "fastapi": "Separate routers, schemas, models, and shared logic."
+              "topic": "Organisation",
+              "django": "Apps with models, views, and forms.",
+              "fastapi": "Routers, SQLAlchemy models, and separate schemas."
             },
             {
-              "topic": "Backend organisation",
-              "django": "Django supports apps; the actual organisation is unverified.",
-              "fastapi": "Domain routers in app/routers and shared modules in app/."
+              "topic": "HTTP and frontend",
+              "django": "URLconf, views, and Django Templates.",
+              "fastapi": "APIRouter, dependencies, Jinja2, and JSON."
             },
             {
-              "topic": "Routes and requests",
-              "django": "Django provides URL routing and views; actual routes are unverified.",
-              "fastapi": "APIRouter, dependencies, Jinja2 HTML, and JSON endpoints."
-            },
-            {
-              "topic": "ORM and persistence",
-              "django": "Django includes an ORM; actual usage is unverified. PostgreSQL/PostGIS are owner-confirmed.",
-              "fastapi": "SQLAlchemy 2, get_db sessions, and relational/geographic models."
+              "topic": "Persistence",
+              "django": "Django ORM, relationships, and app migrations.",
+              "fastapi": "SQLAlchemy 2, get_db, and a custom incremental migrator."
             },
             {
               "topic": "Validation",
-              "django": "Django offers forms and validators; implementation is unverified.",
-              "fastapi": "Pydantic 2 models and validators, plus business checks."
+              "django": "Forms, ModelForms, and model validators.",
+              "fastapi": "Pydantic 2 and business checks."
             },
             {
-              "topic": "Authentication",
-              "django": "Django includes authentication; project configuration was not inspected.",
-              "fastapi": "Signed sessions, PBKDF2-SHA256, CSRF, and role/ownership checks."
+              "topic": "Access",
+              "django": "Django auth/sessions; role and shop checks.",
+              "fastapi": "Starlette sessions, CSRF, and role/ownership checks."
             },
             {
-              "topic": "Transactions",
-              "django": "The owner confirms stock reservation; internals are unverified.",
-              "fastapi": "Conditional UPDATE, rowcount, rollback, unique codes, and order locks."
+              "topic": "Geolocation",
+              "django": "Python Haversine; radius in kilometres.",
+              "fastapi": "Python Haversine; radius in metres. Geometry model declared."
             },
             {
-              "topic": "Integrations",
-              "django": "Geolocation and Stripe are owner-confirmed.",
-              "fastapi": "PostGIS, Stripe Checkout, signed webhooks, and documented local email."
+              "topic": "Stock and transactions",
+              "django": "atomic + select_for_update on products.",
+              "fastapi": "Conditional UPDATE + rowcount + commit/rollback."
+            },
+            {
+              "topic": "Retries",
+              "django": "Unique code, previous payment in session, and per-order Stripe key. Not equivalent to deduplicating simultaneous checkout requests.",
+              "fastapi": "Unique purchase token, IntegrityError, and Stripe key."
+            },
+            {
+              "topic": "Payments",
+              "django": "Checkout and signed webhook; reservation/release under locks.",
+              "fastapi": "Checkout and signed webhook; reservation reconciliation."
             },
             {
               "topic": "Testing",
-              "django": "Test suite and coverage are unavailable.",
-              "fastapi": "Pytest and Locust files inspected, not executed in this review."
-            },
-            {
-              "topic": "Maintainability",
-              "django": "Implementation quality is not inferred from the framework.",
-              "fastapi": "Observed separation of responsibilities; no comparative metrics."
+              "django": "Django tests; PostgreSQL-only concurrency case.",
+              "fastapi": "Pytest with in-memory SQLite and Locust scenarios."
             }
           ]
-        }
+        },
+        "implementations": [
+          {
+            "name": "Django",
+            "repository": "https://github.com/STX3837/Distans-Django",
+            "architecture": "Domain apps: users, stores, products, carts, and orders.",
+            "persistence": "Django ORM · PostgreSQL / PostGIS",
+            "frontend": "Django Templates · JavaScript",
+            "highlights": [
+              "Django forms and built-in authentication.",
+              "Product row locks before stock reservation."
+            ]
+          },
+          {
+            "name": "FastAPI",
+            "repository": "https://github.com/STX3837/Distans-FastAPI",
+            "architecture": "Domain routers with separate models and schemas.",
+            "persistence": "SQLAlchemy 2 · PostgreSQL / PostGIS",
+            "frontend": "Jinja2 · JavaScript",
+            "highlights": [
+              "Pydantic 2 validation and signed sessions.",
+              "Reservation through conditional updates."
+            ]
+          }
+        ],
+        "concurrency": {
+          "title": "Two shoppers. One last unit.",
+          "intro": "If both read the same stock before reserving, they may try to buy the same unit. Availability must be checked within the operation that changes inventory.",
+          "diagram": [
+            "Shopper A",
+            "1 available unit",
+            "Shopper B"
+          ],
+          "strategies": [
+            {
+              "name": "Django",
+              "steps": [
+                "transaction.atomic() groups validation, order creation, and stock deduction.",
+                "select_for_update() locks products ordered by pk; stock and price are rechecked under the lock.",
+                "The updated stock is saved. An exception rolls back the atomic block; release uses F() and a locked order."
+              ]
+            },
+            {
+              "name": "FastAPI",
+              "steps": [
+                "UPDATE requires an available product and sufficient stock before deduction.",
+                "rowcount confirms one modified row; otherwise rollback and HTTP 409.",
+                "A unique token-derived order code and recovery after IntegrityError handle retries; with_for_update locks existing orders, not the product read."
+              ]
+            }
+          ],
+          "note": "The diagram represents a purchase scenario. Row locks require a supporting database such as PostgreSQL."
+        },
+        "testing": "Both repositories include purchase and payment tests. Django contains a concurrent TransactionTestCase enabled only on PostgreSQL; its portable configuration and the Pytest setup use SQLite. Locust scenarios and load artefacts exist, but were not run here or presented as equivalent experiments.",
+        "conclusion": "Two approaches to the same domain, covering full-stack development, backend architecture, persistence, service integration, data consistency, and software quality.",
+        "references": [
+          {
+            "label": "Django · nucleo/urls.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/nucleo/urls.py"
+          },
+          {
+            "label": "Django · users/forms.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/users/forms.py"
+          },
+          {
+            "label": "Django · products/views.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/products/views.py"
+          },
+          {
+            "label": "Django · orders/utils.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/orders/utils.py"
+          },
+          {
+            "label": "Django · orders/models.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/orders/models.py"
+          },
+          {
+            "label": "Django · orders/views.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/orders/views.py"
+          },
+          {
+            "label": "Django · stores/utils.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/stores/utils.py"
+          },
+          {
+            "label": "Django · orders/test_payment_safety.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/orders/test_payment_safety.py"
+          },
+          {
+            "label": "Django · nucleo/settings_test.py",
+            "href": "https://github.com/STX3837/Distans-Django/blob/a61fb698d1b59dec00cdced017dbddbb565b557e/nucleo/settings_test.py"
+          },
+          {
+            "label": "FastAPI · main.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/main.py"
+          },
+          {
+            "label": "FastAPI · app/database.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/database.py"
+          },
+          {
+            "label": "FastAPI · app/schemas.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/schemas.py"
+          },
+          {
+            "label": "FastAPI · app/routers/auth.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/routers/auth.py"
+          },
+          {
+            "label": "FastAPI · app/routers/catalogo.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/routers/catalogo.py"
+          },
+          {
+            "label": "FastAPI · app/routers/compra.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/routers/compra.py"
+          },
+          {
+            "label": "FastAPI · app/models.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/models.py"
+          },
+          {
+            "label": "FastAPI · app/stripe_payments.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/app/stripe_payments.py"
+          },
+          {
+            "label": "FastAPI · tests/conftest.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/tests/conftest.py"
+          },
+          {
+            "label": "FastAPI · tests/test_compra_directa.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/tests/test_compra_directa.py"
+          },
+          {
+            "label": "FastAPI · tests/test_stripe_payments.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/tests/test_stripe_payments.py"
+          },
+          {
+            "label": "FastAPI · load_tests/locustfile.py",
+            "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/load_tests/locustfile.py"
+          }
+        ]
       }
-    }
+    },
+    "repositories": [
+      {
+        "label": "Django",
+        "href": "https://github.com/STX3837/Distans-Django"
+      },
+      {
+        "label": "FastAPI",
+        "href": "https://github.com/STX3837/Distans-FastAPI"
+      }
+    ]
   },
   {
     "slug": "puerto-dataspace-edc",
@@ -429,7 +525,7 @@ export const projects: Project[] = [
         "title": "Puerto Dataspace EDC",
         "description": "Prototipo de intercambio seguro y controlado de datos entre participantes del entorno portuario.",
         "problem": "Una empresa transportista necesita consultar tres autorizaciones independientes para saber si puede retirar un contenedor, respetando las condiciones de acceso de cada proveedor.",
-        "solution": "Un demostrador local de espacio de datos con EDC, DSP y DCP. El Consumer obtiene información autorizada de tres Providers y construye un estado agregado, sin convertir el espacio de datos en un almacén centralizado.",
+        "solution": "Un demostrador local con EDC, DSP y DCP. Cada Provider expone su información y el Consumer agrega las respuestas autorizadas; el espacio de datos no actúa como almacén centralizado.",
         "features": [
           "Consumer: empresa transportista",
           "Customs: autorización aduanera",
@@ -450,7 +546,7 @@ export const projects: Project[] = [
           "Vincular identidad, políticas y contenedor sin confundir autenticación con autorización.",
           "Hacer trazable un flujo de catálogo, contrato, transferencia y agregación."
         ],
-        "evidenceNote": "Demostrador local con servicios mock y configuración de desarrollo. Se han inspeccionado código, configuración y documentación; no se han levantado contenedores ni ejecutado Gradle o los smoke tests en esta revisión. No representa una plataforma productiva ni una integración con autoridades reales.",
+        "evidenceNote": "Prototipo local con datos mock, Vault en modo dev y configuración de demostración. El evaluador de rol incluye una excepción para la identidad fija de la demo. No se han ejecutado sus contenedores ni suites en esta revisión.",
         "sections": [
           {
             "title": "Identidad y políticas de acceso",
@@ -545,7 +641,7 @@ export const projects: Project[] = [
               "Ejecutar la demo completa, arrancar EDC sin smoke o lanzar solo la validación.",
               "Flujo manual por Provider: catálogo, oferta, negociación, transferencia, EDR y descarga.",
               "Provisionado: crear, consultar, actualizar y borrar Assets, Policies y Contract Definitions.",
-              "Validaciones de coherencia de containerId y consulta de artefactos y timeline. No se han generado capturas ficticias."
+              "Validaciones de coherencia de containerId y consulta de artefactos y timeline."
             ],
             "sources": [
               {
@@ -568,8 +664,8 @@ export const projects: Project[] = [
               "El script principal arranca y provisiona participantes, emite credenciales, registra recursos y lanza el smoke test multi-provider."
             ],
             "items": [
-              "El smoke consulta catálogos, negocia contratos, transfiere, descarga y comprueba la agregación. Son pasos implementados, no una ejecución realizada para este portfolio.",
-              "Hay tests Java de scopes DCP y evaluación de credenciales/órdenes. Su presencia no se presenta como un resultado de tests ejecutados.",
+              "El smoke consulta catálogos, negocia contratos, transfiere, descarga y comprueba la agregación.",
+              "Hay tests Java de scopes DCP y evaluación de credenciales/órdenes.",
               "El resultado esperado para los datos favorables de demostración es READY_FOR_PICKUP; otros datos mock incluyen una inspección sanitaria pendiente."
             ],
             "sources": [
@@ -593,13 +689,27 @@ export const projects: Project[] = [
           }
         ],
         "featuresTitle": "Caso de uso y participantes",
-        "solutionTitle": "Objetivo y solución"
+        "solutionTitle": "Objetivo y solución",
+        "keyPoints": [
+          {
+            "title": "Cuatro participantes",
+            "text": "Un Consumer transportista y tres Providers: Customs, Health y CivilGuard."
+          },
+          {
+            "title": "Acceso controlado",
+            "text": "Catálogo, contrato, transferencia y EDR antes de descargar."
+          },
+          {
+            "title": "Una decisión agregada",
+            "text": "Tres autorizaciones CLEARED permiten READY_FOR_PICKUP, con datos mock."
+          }
+        ]
       },
       "en": {
         "title": "Puerto Dataspace EDC",
         "description": "Prototype for secure, controlled data exchange among participants in a port environment.",
         "problem": "A transport company needs three independent clearances before collecting a container, while respecting each provider’s access conditions.",
-        "solution": "A local EDC, DSP, and DCP dataspace demonstrator. A Consumer obtains authorised information from three Providers and builds an aggregate status without turning the dataspace into a central data store.",
+        "solution": "A local EDC, DSP, and DCP demonstrator. Each Provider exposes its information and the Consumer aggregates authorised responses; the dataspace is not a central data store.",
         "features": [
           "Consumer: transport company",
           "Customs: customs clearance",
@@ -620,7 +730,7 @@ export const projects: Project[] = [
           "Connecting identity, policies, and containers without confusing authentication with authorisation.",
           "Making catalogue, contract, transfer, and aggregation steps traceable."
         ],
-        "evidenceNote": "A local demonstrator with mock services and development configuration. Code, configuration, and documentation were inspected; containers, Gradle, and smoke tests were not run in this review. This is neither a production platform nor an integration with actual public authorities.",
+        "evidenceNote": "Local prototype with mock data, dev-mode Vault, and demonstration configuration. Its role evaluator includes an exception for the fixed demo identity. Its containers and test suites were not run in this review.",
         "sections": [
           {
             "title": "Identity and access policies",
@@ -715,7 +825,7 @@ export const projects: Project[] = [
               "Run the full demo, start EDC without smoke, or run validation only.",
               "Manual Provider flow: catalogue, offer, negotiation, transfer, EDR, and download.",
               "Provisioning: create, read, update, and delete Assets, Policies, and Contract Definitions.",
-              "Container-ID consistency checks, artefacts, and event timeline. No fictional screenshots have been created."
+              "Container-ID consistency checks, artefacts, and event timeline."
             ],
             "sources": [
               {
@@ -738,8 +848,8 @@ export const projects: Project[] = [
               "The main script starts and provisions participants, issues credentials, registers resources, and launches the multi-provider smoke test."
             ],
             "items": [
-              "The smoke test queries catalogues, negotiates contracts, transfers, downloads, and checks aggregation. These are implemented steps, not a run performed for this portfolio.",
-              "Java tests cover DCP scopes and credential/order evaluation. Their presence is not presented as an executed test result.",
+              "The smoke test queries catalogues, negotiates contracts, transfers, downloads, and checks aggregation.",
+              "Java tests cover DCP scopes and credential/order evaluation.",
               "Favourable demo data is expected to yield READY_FOR_PICKUP; other mock data includes a pending health inspection."
             ],
             "sources": [
@@ -763,7 +873,21 @@ export const projects: Project[] = [
           }
         ],
         "featuresTitle": "Use case and participants",
-        "solutionTitle": "Objective and solution"
+        "solutionTitle": "Objective and solution",
+        "keyPoints": [
+          {
+            "title": "Four participants",
+            "text": "A transport Consumer and three Providers: Customs, Health, and CivilGuard."
+          },
+          {
+            "title": "Controlled access",
+            "text": "Catalogue, contract, transfer, and EDR before download."
+          },
+          {
+            "title": "One aggregate decision",
+            "text": "Three CLEARED authorisations yield READY_FOR_PICKUP, using mock data."
+          }
+        ]
       }
     }
   },
@@ -779,7 +903,7 @@ export const projects: Project[] = [
         "title": "AURA",
         "description": "Aplicación orientada a generar itinerarios de viaje personalizados mediante modelos de lenguaje y datos geográficos.",
         "problem": "Combinar preferencias del viajero, destinos y recorridos al organizar un itinerario.",
-        "solution": "Un planificador de viajes con IA. El alcance aportado por el propietario incluye generación de itinerarios, personalización, rutas y mapas e interfaz responsive.",
+        "solution": "Un planificador orientado a combinar preferencias del viajero, itinerarios y datos geográficos mediante modelos de lenguaje. El estado de implementación de cada función sigue pendiente de confirmar.",
         "features": [
           "Itinerarios según preferencias del viajero",
           "Integración de modelos de lenguaje",
@@ -787,22 +911,35 @@ export const projects: Project[] = [
           "Diseño responsive y experiencia de usuario"
         ],
         "architecture": [
-          "Alcance funcional proporcionado por el propietario; arquitectura interna pendiente de verificar.",
-          "Proveedor de IA, modelo y stack técnico no confirmados."
+          "Integración de modelos de lenguaje y representación de rutas como alcance funcional.",
+          "Arquitectura interna, proveedor de IA y stack técnico pendientes de confirmar."
         ],
         "challenges": [
           "Coherencia de los itinerarios y su adaptación a preferencias.",
-          "Presentación comprensible de destinos y rutas en pantallas pequeñas.",
-          "Retos del dominio, sin atribuir soluciones internas no verificadas."
+          "Presentación comprensible de destinos y rutas en pantallas pequeñas."
         ],
-        "evidenceNote": "Información aportada por el propietario, sin repositorio disponible para esta revisión. No se han verificado implementaciones, pruebas, proveedor de IA ni despliegue. La separación entre funciones implementadas y previstas queda pendiente de confirmar.",
-        "featuresTitle": "Alcance declarado, pendiente de confirmar"
+        "evidenceNote": "Alcance funcional pendiente de contrastar con el repositorio. No se confirma qué funciones están implementadas o previstas, ni el proveedor de IA o un despliegue público.",
+        "featuresTitle": "Alcance declarado, pendiente de confirmar",
+        "keyPoints": [
+          {
+            "title": "Personalización",
+            "text": "Preferencias del viajero como punto de partida."
+          },
+          {
+            "title": "Planificación",
+            "text": "Itinerarios apoyados en modelos de lenguaje."
+          },
+          {
+            "title": "Contexto geográfico",
+            "text": "Destinos y rutas con una presentación responsive."
+          }
+        ]
       },
       "en": {
         "title": "AURA",
         "description": "An application designed to generate personalised travel itineraries using language models and geographic data.",
         "problem": "Combine traveller preferences, destinations, and routes when planning an itinerary.",
-        "solution": "An AI travel planner. The owner-provided scope includes itinerary generation, personalisation, routes and maps, and a responsive interface.",
+        "solution": "A planner designed to combine traveller preferences, itineraries, and geographic data through language models. The implementation status of each feature remains unconfirmed.",
         "features": [
           "Itineraries based on traveller preferences",
           "Language model integration",
@@ -810,16 +947,29 @@ export const projects: Project[] = [
           "Responsive design and user experience"
         ],
         "architecture": [
-          "Owner-provided functional scope; internal architecture awaits verification.",
-          "AI provider, model, and technical stack are unconfirmed."
+          "Language model integration and route presentation are part of the functional scope.",
+          "Internal architecture, AI provider, and technical stack await confirmation."
         ],
         "challenges": [
           "Itinerary coherence and adaptation to preferences.",
-          "Clear presentation of destinations and routes on small screens.",
-          "Domain challenges, without attributing unverified internal solutions."
+          "Clear presentation of destinations and routes on small screens."
         ],
-        "evidenceNote": "Owner-provided information, without a repository available for this review. Implementation, tests, AI provider, and deployment have not been verified. Confirmation of which features are implemented or planned is pending.",
-        "featuresTitle": "Stated scope, awaiting confirmation"
+        "evidenceNote": "Functional scope awaiting repository verification. Implemented versus planned features, the AI provider, and any public deployment remain unconfirmed.",
+        "featuresTitle": "Stated scope, awaiting confirmation",
+        "keyPoints": [
+          {
+            "title": "Personalisation",
+            "text": "Traveller preferences as the starting point."
+          },
+          {
+            "title": "Planning",
+            "text": "Itineraries supported by language models."
+          },
+          {
+            "title": "Geographic context",
+            "text": "Destinations and routes in a responsive presentation."
+          }
+        ]
       }
     }
   }

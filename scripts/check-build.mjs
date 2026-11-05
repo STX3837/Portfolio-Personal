@@ -32,9 +32,15 @@ for (const [route, { html, ids }] of pages) {
     for (const [index, slug] of ['distans', 'puerto-dataspace-edc', 'aura'].entries()) {
       check(cards[index].includes(`/projects/${slug}/`), `featured order: ${slug}`);
     }
-    for (const repo of ['https://github.com/STX3837/Distans-FastAPI', 'https://github.com/STX3837/puerto-dataspace-edc']) {
+    for (const repo of ['https://github.com/STX3837/Distans-Django', 'https://github.com/STX3837/Distans-FastAPI', 'https://github.com/STX3837/puerto-dataspace-edc']) {
       check(html.includes(`href="${repo}"`), `configured repository ${repo}`);
     }
+  }
+  if (route === '/projects/distans/' || route === '/en/projects/distans/') {
+    for (const repo of ['Distans-Django', 'Distans-FastAPI']) check(html.includes(`href="https://github.com/STX3837/${repo}"`), `DISTANS repository ${repo}`);
+    check(html.includes('id="concurrency-title"'), 'visible concurrency case');
+    check(html.includes('id="comparison-title"'), 'comparison table');
+    check(html.includes('class="technical-section technical-references"'), 'secondary technical references');
   }
   check(html.includes(`<html lang="${route.startsWith('/en/') ? 'en' : 'es'}"`), 'language');
   check((html.match(/<h1\b/g) || []).length === 1, 'one h1');

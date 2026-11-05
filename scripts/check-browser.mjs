@@ -11,7 +11,7 @@ const executable = process.env.CHROME_PATH || [
   'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
 ].find(existsSync);
 assert.ok(executable, 'Set CHROME_PATH to an installed Chromium browser.');
-const output = resolve('.verification');
+const output = resolve(process.env.QA_OUTPUT_DIR || '.verification');
 const profile = resolve(output, `chrome-${process.pid}`);
 await mkdir(profile, { recursive: true });
 const browser = spawn(executable, ['--headless=new', '--remote-debugging-port=0',
@@ -61,6 +61,12 @@ try {
       await navigate('/'); await evaluate(`localStorage.setItem('theme', '${theme}')`);
       for (const path of paths) {
         await navigate(path);
+        if (path.endsWith('/projects/distans/')) {
+          assert.equal(await evaluate("document.querySelector('.concurrency-case').closest('details') === null"), true);
+          assert.equal(await evaluate("document.querySelector('.technical-references').open"), false);
+          assert.ok(await evaluate("document.querySelectorAll('.hero-tags li').length <= 6"));
+          if (width >= 768) assert.equal(await evaluate("document.querySelector('.comparison-scroll').scrollWidth <= document.querySelector('.comparison-scroll').clientWidth"), true, 'Desktop comparison must fit');
+        }
         // Technical content must also fit when readers open the native disclosures.
         if (path.includes('/projects/')) await evaluate("document.querySelectorAll('.technical-section').forEach(section => section.open = true)");
         const result = await evaluate(`(() => {
@@ -94,11 +100,14 @@ try {
         assert.equal(result.theme, theme); assert.equal(result.lang, path.startsWith('/en/') ? 'en' : 'es');
         assert.deepEqual(result.contrastFailures, [], `Text contrast: ${path}, ${width}, ${theme}`);
         assert.equal(result.mobile, width <= 620); assert.equal(result.desktop, width > 620);
-        if (path === '/' || ((width === 320 || width === 1440) && path === '/en/')) {
+        if (path === '/' || ((width === 320 || width === 1440) && path === '/en/') || ([375,768,1440].includes(width) && path.endsWith('/projects/distans/'))) {
+          // Capture the default reading experience; expanded disclosures were checked above.
+          await evaluate("document.querySelectorAll('.technical-section').forEach(section => section.open = false)");
           const metrics = await send('Page.getLayoutMetrics');
           const screenshot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true,
             clip: { x: 0, y: 0, width, height: metrics.cssContentSize.height, scale: 1 } });
-          await writeFile(resolve(output, `${path === '/' ? 'es' : 'en'}-${width}-${theme}.png`), Buffer.from(screenshot.data, 'base64'));
+          const name = `${path.startsWith('/en/') ? 'en' : 'es'}${path.endsWith('/projects/distans/') ? '-distans' : ''}-${width}-${theme}.png`;
+          await writeFile(resolve(output, name), Buffer.from(screenshot.data, 'base64'));
         }
       }
     }
@@ -110,6 +119,19 @@ try {
     await send('Input.dispatchMouseEvent', { type: 'mousePressed', ...point, button: 'left', clickCount: 1 });
     await send('Input.dispatchMouseEvent', { type: 'mouseReleased', ...point, button: 'left', clickCount: 1 });
   };
+  await navigate('/');
+  await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+  assert.equal(await evaluate("document.activeElement.classList.contains('skip-link')"), true, 'Keyboard skip link');
+  await navigate('/projects/distans/');
+  await evaluate("document.querySelector('.technical-references summary').focus()");
+  const pressEnter = async () => {
+    await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' });
+    await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+  };
+  await pressEnter();
+  await until(() => evaluate("document.querySelector('.technical-references').open"));
+  await pressEnter();
+  await until(() => evaluate("!document.querySelector('.technical-references').open"));
   await navigate('/'); await click('.mobile-menu summary'); assert.equal(await evaluate("document.querySelector('.mobile-menu').open"), true);
   assert.equal(await evaluate("document.querySelector('.mobile-menu [aria-current]').dataset.section"), 'home');
   await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
@@ -133,6 +155,6 @@ try {
   await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
   assert.equal(await evaluate('getComputedStyle(document.documentElement).scrollBehavior'), 'auto');
   await writeFile(resolve(output, 'browser-results.json'), JSON.stringify({ browser: await send('Browser.getVersion'), cases: results, interactions: 'passed' }, null, 2));
-  console.log(`PASS: ${results.length} page/viewport/theme cases, theme persistence/system/blocked storage, mobile menu, Escape, ES/EN routes and hash, reduced motion. Screenshots: .verification/`);
+  console.log(`PASS: ${results.length} page/viewport/theme cases, theme persistence/system/blocked storage, mobile menu, Escape, ES/EN routes and hash, reduced motion, keyboard and case study. Screenshots: ${output}`);
   await send('Browser.close').catch(() => {});
 } finally { socket?.close(); browser.kill(); }

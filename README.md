@@ -15,6 +15,17 @@ npm run dev
 
 Abre la dirección que imprime Astro, normalmente `http://localhost:4321`.
 
+En PowerShell con fnm, activa primero la versión del proyecto en cada terminal nueva:
+
+```powershell
+fnm env --use-on-cd --shell powershell | Out-String | Invoke-Expression
+fnm use 22.23.4
+node -v
+npm -v
+```
+
+Si aparece `Cannot find native binding` de Rolldown después de instalar con un Node anterior, ejecuta `npm ci --include=optional` con Node 22.23.4 activo y vuelve a iniciar `npm run dev`. El lockfile incluye el binding nativo de Windows: no es necesario borrarlo ni añadir el fallback WASM como dependencia del proyecto.
+
 | Comando | Uso |
 | --- | --- |
 | `npm run dev` | Desarrollo local |
@@ -29,7 +40,7 @@ Abre la dirección que imprime Astro, normalmente `http://localhost:4321`.
 
 ```text
 src/
-  components/   Home, Header, Footer, SocialLinks, ProjectArt, ProjectDetail, ProjectSections
+  components/   Home, Header, Footer, SocialLinks, ProjectArt, ProjectDetail, ProjectSections, ProjectCaseStudy
   layouts/      BaseLayout: documento, SEO y estructura común
   data/         profile.ts y projects.ts
   i18n/         ui.ts: interfaz y tipo Locale
@@ -47,9 +58,9 @@ docs/           Informes de seguridad y preparación de producción
 
 Edita `src/i18n/ui.ts` para los textos de interfaz en ambos idiomas. El contenido de proyectos está en `src/data/projects.ts`, tipado mediante `Project` y `Record<Locale, ProjectContent>`. Astro configura los idiomas en `astro.config.mjs`.
 
-Para añadir un proyecto, incorpora un objeto con slug único, etiquetas y contenido completo en `es` y `en`. Las dos rutas `[slug].astro` usan `getStaticPaths()` para generar las páginas automáticamente. El selector conserva el proyecto equivalente y el fragmento de sección. Añade `repository` y `website` únicamente con URLs reales; `results` es opcional y debe contener resultados documentados. `technologies` permite ampliar las etiquetas de la ficha; `sections` añade apartados desplegables con fuentes; `comparison` contiene la tabla Django/FastAPI. Cada idioma incluye `evidenceNote` para explicar el alcance de la verificación.
+Para añadir un proyecto, incorpora un objeto con slug único, etiquetas y contenido completo en `es` y `en`. Las dos rutas `[slug].astro` usan `getStaticPaths()` para generar las páginas automáticamente. El selector conserva el proyecto equivalente y el fragmento de sección. Añade `repository` y `website` únicamente con URLs reales; `results` es opcional y debe contener resultados documentados. `technologies` permite ampliar las etiquetas de la ficha; `sections` añade apartados desplegables con fuentes; `comparison` contiene la tabla Django/FastAPI. `implementations` presenta los dos bloques de implementación; `concurrency` describe el caso visible; `keyPoints` resume otras fichas. Las referencias se agrupan en un desplegable secundario. Cada idioma incluye `evidenceNote` para explicar el alcance de la verificación.
 
-Las ilustraciones geométricas CSS se etiquetan como conceptuales; no son capturas ni documentación real de los sistemas. DISTANS reúne ambas implementaciones y enlaza el código FastAPI inspeccionado; Django se limita al alcance aportado por el propietario. Puerto EDC explica un demostrador local con datos mock y condiciones de acceso de la demo. AURA distingue alcance declarado de implementación pendiente de confirmar. Las fuentes fijadas a commits, limitaciones y datos pendientes están en [docs/project-evidence.md](docs/project-evidence.md). No se ejecutaron las aplicaciones externas ni sus suites de pruebas.
+Las ilustraciones geométricas CSS se etiquetan como conceptuales; no son capturas ni documentación real de los sistemas. DISTANS reúne las implementaciones Django y FastAPI, ambas inspeccionadas y enlazadas. Su caso de estudio muestra las estrategias de reserva de stock y una comparación basada en código. Puerto EDC explica un demostrador local con datos mock y condiciones de acceso de la demo. AURA distingue alcance declarado de implementación pendiente de confirmar. Las fuentes fijadas a commits, limitaciones y datos pendientes están en [docs/project-evidence.md](docs/project-evidence.md). No se ejecutaron las aplicaciones externas ni sus suites de pruebas.
 
 ## Enlaces personales y CV
 
@@ -99,4 +110,12 @@ Se conservaron íntegramente los componentes, configuración, diseño y datos pe
 
 Pendiente de aportar: email, perfiles sociales, repositorios, CV, dominio y detalles internos/resultados documentados de proyectos. Estos datos no se han inventado.
 
-Los repositorios públicos confirmados de DISTANS FastAPI y Puerto Dataspace EDC sí están configurados en sus fichas. Siguen pendientes el repositorio Django, el de AURA y la confirmación de funciones implementadas frente a previstas de AURA. Las pruebas de build comprueban selección, orden, enlaces públicos y ausencia del proyecto retirado; las de navegador abren los apartados técnicos para comprobar también su contenido responsive.
+Los repositorios públicos confirmados de DISTANS FastAPI y Puerto Dataspace EDC sí están configurados en sus fichas. Sigue pendiente el repositorio de AURA y la confirmación de sus funciones implementadas frente a previstas. Django ya está verificado junto a FastAPI. Las pruebas de build comprueban selección, orden, enlaces públicos y ausencia del proyecto retirado; las de navegador abren los apartados técnicos para comprobar también su contenido responsive.
+
+## Iteración visual y técnica 4
+
+Inicio con hero más compacto y tarjetas de dimensiones coherentes. Las fichas muestran un máximo de seis tecnologías iniciales, resumen de problema/solución y claves técnicas. DISTANS añade dos bloques de implementación, concurrencia visible, comparativa, síntesis de pruebas y conclusiones; las fuentes y detalles adicionales permanecen disponibles en desplegables. No se añadieron dependencias ni se cambió Astro, los slugs o la configuración de Vercel.
+
+La inspección confirmó Haversine en Python en ambos catálogos: no se presenta como implementada una diferencia de consultas espaciales PostGIS. Django reserva con `atomic` y bloqueo de productos; FastAPI con `UPDATE` condicionado y `rowcount`. La explicación completa, fuentes permanentes y límites están en [project-evidence.md](docs/project-evidence.md).
+
+Para guardar las capturas de navegador en una carpeta propia, inicia preview y define `QA_OUTPUT_DIR` antes de `npm run check:browser`, por ejemplo `$env:QA_OUTPUT_DIR = '.verification/iteration-4'`. Se capturan inicio y DISTANS, incluidos 375, 768 y 1440 px, en ambos temas. La prueba comprueba también el enlace de salto, los desplegables por teclado y que la tabla cabe en escritorio.

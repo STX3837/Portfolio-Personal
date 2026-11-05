@@ -1,0 +1,41 @@
+---
+import type { ProjectContent } from '../data/projects';
+import { copy, type Locale } from '../i18n/ui';
+interface Props { content: ProjectContent; locale: Locale }
+const { content, locale } = Astro.props;
+const t = copy[locale];
+---
+{content.implementations && <section class="case-section" aria-labelledby="implementations-title">
+  <p class="eyebrow">DISTANS / 01</p>
+  <h2 id="implementations-title">{t.implementationTitle}</h2>
+  <div class="implementation-grid">
+    {content.implementations.map((implementation, index) => <article class="implementation-card">
+      <p class="eyebrow">0{index + 1}</p><h3>{implementation.name}</h3>
+      <dl><dt>{t.architecture}</dt><dd>{implementation.architecture}</dd><dt>{t.persistence}</dt><dd>{implementation.persistence}</dd><dt>{t.frontend}</dt><dd>{implementation.frontend}</dd></dl>
+      <ul>{implementation.highlights.map(item => <li>{item}</li>)}</ul>
+      <a class="project-link" href={implementation.repository} target="_blank" rel="noopener noreferrer">{t.viewCode} {implementation.name} ↗</a>
+    </article>)}
+  </div>
+</section>}
+{content.concurrency && <section class="case-section concurrency-case" aria-labelledby="concurrency-title">
+  <p class="eyebrow">DISTANS / 02</p>
+  <h2 id="concurrency-title">{content.concurrency.title}</h2><p class="case-intro">{content.concurrency.intro}</p>
+  <figure class="concurrency-diagram">
+    <figcaption>{t.concept}</figcaption>
+    <div class="race-flow"><span>{content.concurrency.diagram[0]}</span><span class="last-unit"><span aria-hidden="true">→ </span>{content.concurrency.diagram[1]}<span aria-hidden="true"> ←</span></span><span>{content.concurrency.diagram[2]}</span></div>
+  </figure>
+  <div class="strategy-grid">{content.concurrency.strategies.map(strategy => <article><h3>{strategy.name}</h3><ol>{strategy.steps.map(step => <li>{step}</li>)}</ol></article>)}</div>
+  <p class="case-note">{content.concurrency.note}</p>
+</section>}
+{content.comparison && <section class="case-section" aria-labelledby="comparison-title">
+  <p class="eyebrow">DISTANS / 03</p><h2 id="comparison-title">{content.comparison.title}</h2>
+  <p class="case-note">{content.comparison.note}</p>
+  <div class="comparison-scroll" tabindex="0" role="region" aria-label={content.comparison.title}>
+    <table><caption class="sr-only">{content.comparison.title}</caption>
+      <thead><tr><th scope="col">{t.comparisonTopic}</th><th scope="col">Django</th><th scope="col">FastAPI</th></tr></thead>
+      <tbody>{content.comparison.rows.map(row => <tr><th scope="row">{row.topic}</th><td>{row.django}</td><td>{row.fastapi}</td></tr>)}</tbody>
+    </table>
+  </div>
+</section>}
+{content.testing && <section class="case-section case-testing" aria-labelledby="testing-title"><h2 id="testing-title">{t.testing}</h2><p>{content.testing}</p></section>}
+{content.conclusion && <section class="case-section case-conclusion" aria-labelledby="conclusion-title"><h2 id="conclusion-title">{t.conclusion}</h2><p>{content.conclusion}</p></section>}
