@@ -254,3 +254,50 @@ Resultados reales con Node 22.23.4 y Astro 7.4.5:
 Chrome comprobó carga desde dist, seis imágenes EDC únicas y sus tres grupos, dimensiones/proporciones, alt, ausencia de imágenes rotas, contraste DOM, ausencia de desbordamiento de página, Tab/foco visible en seis enlaces EDC y cinco DISTANS, menú/Escape, idioma/rutas/hash, temas/persistencia, almacenamiento bloqueado, reduced motion, tabla y desplegables. Las rutas originales y una ruta de respaldo respondieron HTTP 404. Los hashes de los doce originales están ausentes de todos los archivos de public y dist. Los metadatos PNG publicados no contienen la fuente original ni datos reversibles.
 
 Se generaron 40 PNG y browser-results.json en `.verification/iteration-7/browser/`. Se revisaron visualmente los seis PNG ES de EDC en 375, 768 y 1440 px, ambos temas, además de las seis copias públicas saneadas. Estos controles no certifican accesibilidad ni el contraste del texto dentro de los raster. Pendientes: lectores de pantalla, otros motores/dispositivos, comprobar o rotar valores expuestos si siguen vigentes y revisión del hosting cuando se publique. Preview se detuvo al terminar. Sin commit, despliegue ni modificaciones externas.
+
+## Iteración 8 — verificación del 17-11-2026
+
+Rama inicial: content/professional-projects; árbol limpio antes de editar. Se mantiene Astro 7.4.5, Node 22.23.4, TypeScript estricto, CSS nativo y SSG. No se modifican dependencias, lockfile, configuración de despliegue, imágenes ni datos técnicos de EDC. Una comparación de los datos contra HEAD confirmó que DISTANS solo añade contexto académico y su nota de procedencia; conserva íntegro el caso de estudio.
+
+AURA se presenta como proyecto de 17 personas, con repositorio de equipo, tres ejes técnicos visibles y detalles secundarios en desplegables. Las fuentes permanentes y atribuciones limitadas a PR están en project-evidence.md. No se ejecutaron AURA ni sus pruebas, servicios o integraciones.
+
+| Comprobación | Resultado real |
+| --- | --- |
+| npm test | Correcto: configuración y privacidad |
+| npm run check | 31 archivos; cero errores, advertencias e hints |
+| npm run build | Ocho páginas estáticas y barreras de privacidad public/dist correctas |
+| npm run check:build | Ocho páginas, 174 enlaces/recursos y anclas; ES/EN y metadatos correctos |
+| SEO con dominio reservado de prueba | Canonical, hreflang, sitemap y robots correctos; dist restaurado sin ese dominio |
+| npm audit | Salida 1: un aviso moderado directo en Astro, GHSA-r3h5-4585-7x3w; véase security-audit.md |
+| npm run check:browser | Correcto: 96 casos con preview local en 4347 |
+
+Chrome comprobó ocho rutas, seis anchos (320/375/430/768/1024/1440), ambos temas, ausencia de desbordamiento de página, contraste DOM, idioma y hash, persistencia/sistema/almacenamiento bloqueado, menú móvil/Escape, movimiento reducido y teclado/foco visible. Se verificaron las etiquetas académicas ES/EN, nota global sin calificación por implementación, equipo AURA y enlace al repositorio, sus tres puntos técnicos y ausencia de galería ficticia. También pasan las cinco imágenes DISTANS, seis EDC y las rutas privadas con HTTP 404.
+
+Se generaron 52 PNG y browser-results.json en .verification/iteration-8 (ignorados por Git). Revisión visual de doce capturas ES: DISTANS y AURA a 375/768/1440 en claro y oscuro. Las miniaturas conservan acceso al original; el contraste DOM no certifica texto incrustado en imágenes. El primer intento de navegador coincidió con la regeneración de dist y falló; se repitió completo contra la salida estable, con los 96 casos correctos.
+
+Pendientes: alcance académico exacto de la evaluación de DISTANS; responsabilidades adicionales de AURA, ejecución real de sus servicios y suites, capturas públicas autorizadas, lectores de pantalla y otros motores/dispositivos. Antes de publicar: revisar el parche de Astro (corregido desde 7.4.7, retenido en 7.4.5 por instrucción), configurar SITE_URL definitivo y repetir comprobaciones. La salida estática funciona; la auditoría no está limpia. Sin commit, despliegue ni cambios externos.
+
+## Iteración 9 — validación final del 17-11-2026
+
+Estado vigente: **apto técnicamente para publicación estática**, sujeto a configurar el dominio real y Node compatible en el hosting. Astro **7.4.5 → 7.4.12**, último parche estable de la rama 7.4.x consultado en npm. Corrige GHSA-r3h5-4585-7x3w (parche desde 7.4.7). No se realizó migración mayor de Astro ni se modificaron funcionalidades, proyectos, CSS, arquitectura, configuración o sistema de imágenes.
+
+Se conservó la rama content/professional-projects y todo el trabajo pendiente de iteración 8. Antes de instalar se guardaron hashes de sus archivos y copia del lockfile en .verification/iteration-9. Una comparación posterior confirmó que los archivos pendientes ajenos a los tres documentos autorizados permanecen idénticos byte a byte. Esta iteración solo modifica package.json, package-lock.json, README.md, docs/security-audit.md y este informe. docs/project-evidence.md conserva exactamente el estado previo.
+
+| Verificación ejecutada | Resultado real |
+| --- | --- |
+| npm ci --include=optional | Correcto; 270 paquetes instalados con Node 22.23.4 |
+| npm audit --json | Salida 0; cero vulnerabilidades notificadas |
+| npm test | Correcto; dominio, imágenes opcionales y controles de privacidad |
+| npm run check | 31 archivos, cero errores, advertencias e hints |
+| npm run build | Ocho páginas estáticas; controles public/dist correctos |
+| npm run check:build | Ocho páginas y 174 enlaces/recursos/anclas correctos |
+| Build SEO con SITE_URL HTTPS reservado | Canonical, hreflang, sitemap y robots correctos; dist restaurado después sin dominio de prueba |
+| npm run check:browser con preview en 4347 | Correcto: 96 casos (8 páginas × 6 anchos × 2 temas) |
+
+Chrome comprobó los tres proyectos ES/EN, cinco capturas DISTANS, seis EDC saneadas y únicas, fallback conceptual AURA sin galería ficticia, etiquetas académicas y equipo, menú móvil, Escape, rutas, idioma y hash, temas/persistencia/sistema/almacenamiento bloqueado, movimiento reducido, enlaces mediante teclado y foco visible. Se comprobaron contraste DOM y ausencia de desbordamiento de página en 320/375/430/768/1024/1440 px, incluidos desplegables abiertos. Las rutas conocidas de originales y respaldo siguen devolviendo 404. Las barreras de privacidad comprueban hashes de imágenes revisadas y excluyen los doce originales conocidos y rutas privadas; no constituyen un detector general de secretos nuevos.
+
+Artefactos locales ignorados: .verification/iteration-9/audit.json, dependency-changes.json y browser/browser-results.json junto a 52 PNG. Esta iteración ejecuta comprobaciones automatizadas de navegador; no certifica accesibilidad completa, lectores de pantalla, todos los dispositivos/motores ni texto incrustado en imágenes.
+
+La configuración sigue en output: static, sin adaptador SSR y sin @astrojs/node instalado. dist contiene las ocho páginas, endpoints estáticos sitemap/robots y recursos. Las dependencias transitivas y su exposición están documentadas en security-audit.md; no quedan avisos conocidos según la auditoría ejecutada. Se mantiene Node >=22.23.4 <23 y .nvmrc 22.23.4.
+
+Para publicar, cuando se autorice: seleccionar Node 22.x con parche >=22.23.4 en Vercel, configurar SITE_URL con el origen HTTPS definitivo (sin ruta/query/fragmento), usar el vercel.json existente (npm ci, npm run build, dist) y repetir las comprobaciones con ese dominio antes del despliegue. Comprobar entonces dominio, redirecciones, cabeceras y rutas en el hosting real. No se ha validado ni realizado despliegue remoto. Preview local se detuvo al terminar; no se crearon commits ni se modificaron servicios externos. Los pendientes de evidencias académicas y de AURA registrados en iteración 8 siguen vigentes, sin cambiar su documentación.

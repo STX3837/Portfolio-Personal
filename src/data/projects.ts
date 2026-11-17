@@ -11,6 +11,7 @@ export interface ConcurrencyCase {
  title: string; intro: string; diagram: string[]; strategies: { name: string; steps: string[] }[]; note: string;
 }
 export interface ProjectContent {
+ context?: string[];
  title: string; description: string; problem: string; solution: string;
  features: string[]; architecture: string[]; challenges: string[]; results?: string[];
  evidenceNote: string; sections?: ProjectSection[]; comparison?: ProjectComparison;
@@ -19,6 +20,7 @@ export interface ProjectContent {
  concurrency?: ConcurrencyCase; testing?: string; conclusion?: string; references?: EvidenceLink[];
 }
 export interface Project {
+ repositoryLabel?: Record<Locale, string>;
  gallery?: { title: Record<Locale, string>; groups: { id: string; title: Record<Locale, string>; description: Record<Locale, string>; note?: Record<Locale, string>; images: ProjectScreenshot[] }[] };
  screenshot?: ProjectScreenshot;
  implementationScreenshots?: Record<string, ProjectScreenshot[]>;
@@ -71,7 +73,7 @@ export const projects: Project[] = [
           "Coordinar transacciones locales con un pago externo que puede fallar o repetirse.",
           "Mantener precio, carrito y estado del pedido coherentes durante el checkout."
         ],
-        "evidenceNote": "Fuentes de ambos repositorios fijadas a commits en Referencias técnicas.",
+        "evidenceNote": "Fuentes de ambos repositorios fijadas a commits en Referencias técnicas. Contexto académico aportado por el propietario: TFG conjunto, calificado con 8,6/10. Pendiente confirmar el alcance exacto de la evaluación; no se atribuye una nota independiente a cada implementación.",
         "sections": [],
         "comparison": {
           "title": "Comparativa técnica",
@@ -270,6 +272,11 @@ export const projects: Project[] = [
             "label": "FastAPI · load_tests/locustfile.py",
             "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/load_tests/locustfile.py"
           }
+        ],
+        "context": [
+          "Trabajo de Fin de Grado",
+          "Desarrollado por dos personas",
+          "Calificación: 8,6/10"
         ]
       },
       "en": {
@@ -292,7 +299,7 @@ export const projects: Project[] = [
           "Coordinating local transactions with external payments that may fail or be retried.",
           "Keeping prices, carts, and order states consistent throughout checkout."
         ],
-        "evidenceNote": "Sources from both repositories are pinned to commits under Technical references.",
+        "evidenceNote": "Sources from both repositories are pinned to commits under Technical references. Academic context supplied by the owner: a joint Bachelor's Final Project graded 8.6/10. The exact scope of assessment remains unconfirmed; no separate grade is assigned to either implementation.",
         "sections": [],
         "comparison": {
           "title": "Technical comparison",
@@ -491,6 +498,11 @@ export const projects: Project[] = [
             "label": "FastAPI · load_tests/locustfile.py",
             "href": "https://github.com/STX3837/Distans-FastAPI/blob/21779c98d258f5f2a69313d2fa1b4b4bb2589ba4/load_tests/locustfile.py"
           }
+        ],
+        "context": [
+          "Bachelor's Final Project",
+          "Developed by a two-person team",
+          "Grade: 8.6/10"
         ]
       }
     },
@@ -1111,83 +1123,330 @@ export const projects: Project[] = [
   {
     "slug": "aura",
     "tags": [
-      "LLM",
-      "Web",
-      "Maps"
+      "Django",
+      "PostGIS",
+      "LangGraph",
+      "OR-Tools",
+      "Leaflet.js"
     ],
     "content": {
       "es": {
-        "title": "AURA",
-        "description": "Aplicación orientada a generar itinerarios de viaje personalizados mediante modelos de lenguaje y datos geográficos.",
-        "problem": "Combinar preferencias del viajero, destinos y recorridos al organizar un itinerario.",
-        "solution": "Un planificador orientado a combinar preferencias del viajero, itinerarios y datos geográficos mediante modelos de lenguaje. El estado de implementación de cada función sigue pendiente de confirmar.",
-        "features": [
-          "Itinerarios según preferencias del viajero",
-          "Integración de modelos de lenguaje",
-          "Información geográfica, rutas y destinos",
-          "Diseño responsive y experiencia de usuario"
+        "title": "AURA — Copiloto inteligente para guías turísticos",
+        "description": "Proyecto colaborativo de 17 personas para planificar y gestionar experiencias turísticas con inteligencia artificial, datos geográficos y optimización de rutas.",
+        "context": [
+          "Proyecto colaborativo · Equipo de 17 personas"
         ],
-        "architecture": [
-          "Integración de modelos de lenguaje y representación de rutas como alcance funcional.",
-          "Arquitectura interna, proveedor de IA y stack técnico pendientes de confirmar."
-        ],
-        "challenges": [
-          "Coherencia de los itinerarios y su adaptación a preferencias.",
-          "Presentación comprensible de destinos y rutas en pantallas pequeñas."
-        ],
-        "evidenceNote": "Alcance funcional pendiente de contrastar con el repositorio. No se confirma qué funciones están implementadas o previstas, ni el proveedor de IA o un despliegue público.",
-        "featuresTitle": "Alcance declarado, pendiente de confirmar",
+        "problem": "Un guía necesita transformar preferencias y restricciones del grupo en un recorrido coherente, mantener sus paradas y acompañar la experiencia durante el tour.",
+        "solution": "El equipo desarrolló una aplicación Django con creación manual y asistida de rutas, mapas y sesiones de tour. Combina puntos de interés curados, generación con Gemini, validación geográfica y ordenación de paradas; las propuestas se revisan antes de guardarlas.",
+        "featuresTitle": "Tres ejes técnicos",
         "keyPoints": [
           {
-            "title": "Personalización",
-            "text": "Preferencias del viajero como punto de partida."
+            "title": "Arquitectura Django",
+            "text": "Apps separadas para creación, rutas, tours y facturación. Modelos GeoDjango, vistas, servicios y templates con Bootstrap 5 y Leaflet."
           },
           {
-            "title": "Planificación",
-            "text": "Itinerarios apoyados en modelos de lenguaje."
+            "title": "Planificación con IA",
+            "text": "LangGraph encadena generación, validación, scoring y optimización. Las sesiones Django conservan restricciones, propuestas y checkpoints con caducidad."
           },
           {
-            "title": "Contexto geográfico",
-            "text": "Destinos y rutas con una presentación responsive."
+            "title": "Geografía y recorridos",
+            "text": "PostGIS guarda puntos y geometrías. OR-Tools ordena paradas con una matriz Haversine; GraphHopper permite calcular geometrías de recorrido."
           }
-        ]
+        ],
+        "architecture": [
+          "config registra creacion, rutas, tours, allowList y billing, con rutas HTTP por app.",
+          "rutas modela guías, rutas, paradas y curiosidades; tours añade sesiones, participantes, ubicación y chat.",
+          "El frontend se renderiza con templates Django y recursos HTML/CSS/JavaScript; Bootstrap 5 y Leaflet se cargan desde la plantilla base."
+        ],
+        "features": [
+          "Creación y edición manual de rutas y paradas.",
+          "Propuestas asistidas con puntos de interés curados, Gemini y validación geográfica.",
+          "Estado de generación por sesión con TTL, checkpoints y selección de paradas.",
+          "Mapas de guía y turista, sesiones de tour, ubicación y chat."
+        ],
+        "challenges": [
+          "Validar respuestas y coordenadas de servicios externos antes de persistir una propuesta.",
+          "Conservar el contexto de generación y permitir revisar o rechazar paradas.",
+          "Mantener consistencia entre geometría, orden de paradas, permisos y sesiones de tour."
+        ],
+        "sections": [
+          {
+            "title": "IA, checkpoints y límites",
+            "paragraphs": [
+              "El grafo construye cuatro nodos: generación, validación, scoring y optimización. El generador prioriza la allowlist; Gemini actúa según la disponibilidad de puntos y la configuración.",
+              "Los checkpoints están implementados en request.session con TTL renovable. No se presentan como un checkpointer persistente de LangGraph ni como ejecución asíncrona acreditada."
+            ],
+            "items": [
+              "OR-Tools aplica una heurística de ordenación; no se afirma optimalidad global ni rendimiento medido.",
+              "Mapbox/OSM participan en validación geográfica; GraphHopper es una integración externa para recorridos."
+            ],
+            "sources": []
+          },
+          {
+            "title": "Infraestructura y calidad",
+            "paragraphs": [
+              "Docker Compose define base de datos y Redis. Celery tiene configuración y una tarea de limpieza de mensajes; no se localizó un encolado de la generación de itinerarios.",
+              "pgvector figura en dependencias y en la activación de extensiones SQL; no se localizó un modelo vectorial o búsqueda semántica activa en el código inspeccionado."
+            ],
+            "items": [
+              "Pruebas Django para modelos, servicios, vistas, sesiones, chat, geometría y nodos IA. Las pruebas de generación inspeccionadas simulan los proveedores externos.",
+              "El repositorio incluye pruebas de navegador y escenarios Locust. No se ejecutaron aquí ni se publican métricas de cobertura, carga o fiabilidad."
+            ],
+            "sources": []
+          },
+          {
+            "title": "Trabajo colaborativo y aportaciones verificables",
+            "paragraphs": [
+              "Equipo de 17 personas, incluido Alberto Paleteiro, según información del propietario. Las funcionalidades se describen como trabajo del equipo.",
+              "El historial público asocia STX3837 a los PR #308 (pruebas de tours) y #436 (normalización de errores API), ambos integrados. Acreditan aportaciones concretas, no autoría exclusiva ni responsabilidad de diseño de todo un módulo."
+            ],
+            "items": [
+              "Pendiente confirmar responsabilidades adicionales, coordinación y trabajo no reflejado en Git.",
+              "Sin capturas públicas de AURA ni despliegue productivo verificado en esta revisión."
+            ],
+            "sources": []
+          }
+        ],
+        "references": [
+          {
+            "label": "Django apps / URLconf",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/config/urls.py"
+          },
+          {
+            "label": "Models / GeoDjango",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/rutas/models.py"
+          },
+          {
+            "label": "LangGraph",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/langgraph/graph.py"
+          },
+          {
+            "label": "Generation / sessions",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/services.py"
+          },
+          {
+            "label": "Gemini / routing matrix",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/langgraph/utils.py"
+          },
+          {
+            "label": "OR-Tools",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/langgraph/nodes/optimizacion.py"
+          },
+          {
+            "label": "GraphHopper",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/rutas/graphhopper.py"
+          },
+          {
+            "label": "Frontend",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/templates/base.html"
+          },
+          {
+            "label": "Tours / cache",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/tours/services.py"
+          },
+          {
+            "label": "Celery task",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/tours/tasks.py"
+          },
+          {
+            "label": "Dependencies",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/requirements.txt"
+          },
+          {
+            "label": "Compose",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/docker-compose.yml"
+          },
+          {
+            "label": "Database extensions",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/init-extensions.sql"
+          },
+          {
+            "label": "Generation tests",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/tests/test_e2e_generacion_ruta_ia.py"
+          },
+          {
+            "label": "STX3837 · PR #308",
+            "href": "https://github.com/G4-AURA/AURA/pull/308"
+          },
+          {
+            "label": "STX3837 · PR #436",
+            "href": "https://github.com/G4-AURA/AURA/pull/436"
+          }
+        ],
+        "evidenceNote": "Inspección estática del repositorio del equipo, fijada al commit 3c5e491. No se ejecutaron la aplicación, sus servicios externos ni sus pruebas. El equipo de 17 personas es información aportada por el propietario; las contribuciones se limitan a la evidencia pública citada."
       },
       "en": {
-        "title": "AURA",
-        "description": "An application designed to generate personalised travel itineraries using language models and geographic data.",
-        "problem": "Combine traveller preferences, destinations, and routes when planning an itinerary.",
-        "solution": "A planner designed to combine traveller preferences, itineraries, and geographic data through language models. The implementation status of each feature remains unconfirmed.",
-        "features": [
-          "Itineraries based on traveller preferences",
-          "Language model integration",
-          "Geographic information, routes, and destinations",
-          "Responsive design and user experience"
+        "title": "AURA — AI Copilot for Tour Guides",
+        "description": "A collaborative 17-person project for planning and managing guided tourism experiences with artificial intelligence, geographic data, and route optimization.",
+        "context": [
+          "Collaborative project · 17-person team"
         ],
-        "architecture": [
-          "Language model integration and route presentation are part of the functional scope.",
-          "Internal architecture, AI provider, and technical stack await confirmation."
-        ],
-        "challenges": [
-          "Itinerary coherence and adaptation to preferences.",
-          "Clear presentation of destinations and routes on small screens."
-        ],
-        "evidenceNote": "Functional scope awaiting repository verification. Implemented versus planned features, the AI provider, and any public deployment remain unconfirmed.",
-        "featuresTitle": "Stated scope, awaiting confirmation",
+        "problem": "A guide needs to turn group preferences and constraints into a coherent itinerary, manage its stops, and support participants throughout the tour.",
+        "solution": "The team developed a Django application with manual and assisted route creation, maps, and tour sessions. It combines curated points of interest, Gemini generation, geographic validation, and stop ordering; proposals are reviewed before they are saved.",
+        "featuresTitle": "Three technical foundations",
         "keyPoints": [
           {
-            "title": "Personalisation",
-            "text": "Traveller preferences as the starting point."
+            "title": "Django architecture",
+            "text": "Separate apps for creation, routes, tours, and billing. GeoDjango models, views, services, and templates using Bootstrap 5 and Leaflet."
           },
           {
-            "title": "Planning",
-            "text": "Itineraries supported by language models."
+            "title": "AI-assisted planning",
+            "text": "LangGraph chains generation, validation, scoring, and optimization. Django sessions retain constraints, proposals, and checkpoints with expiry."
           },
           {
-            "title": "Geographic context",
-            "text": "Destinations and routes in a responsive presentation."
+            "title": "Geography and routes",
+            "text": "PostGIS stores points and geometries. OR-Tools orders stops using a Haversine matrix; GraphHopper supports route geometry calculation."
           }
-        ]
+        ],
+        "architecture": [
+          "config registers creacion, rutas, tours, allowList, and billing with app-specific HTTP routes.",
+          "rutas models guides, routes, stops, and curiosities; tours adds sessions, participants, location, and chat.",
+          "Django templates render HTML/CSS/JavaScript; Bootstrap 5 and Leaflet are loaded by the base template."
+        ],
+        "features": [
+          "Manual creation and editing of routes and stops.",
+          "Assisted proposals with curated points of interest, Gemini, and geographic validation.",
+          "Session-based generation state with TTL, checkpoints, and stop selection.",
+          "Guide and tourist maps, tour sessions, location, and chat."
+        ],
+        "challenges": [
+          "Validate external responses and coordinates before persisting proposals.",
+          "Retain generation context while allowing stop review and rejection.",
+          "Keep geometry, stop order, permissions, and tour sessions consistent."
+        ],
+        "sections": [
+          {
+            "title": "AI, checkpoints, and limits",
+            "paragraphs": [
+              "The graph builds four nodes: generation, validation, scoring, and optimization. Generation prioritizes the allowlist; Gemini is used according to point availability and configuration.",
+              "Checkpoints are implemented in request.session with renewable TTL. They are not presented as a persistent LangGraph checkpointer or as verified asynchronous generation."
+            ],
+            "items": [
+              "OR-Tools applies a stop-ordering heuristic; no claim of global optimality or measured performance is made.",
+              "Mapbox/OSM support geographic validation; GraphHopper provides an external routing integration."
+            ],
+            "sources": []
+          },
+          {
+            "title": "Infrastructure and quality",
+            "paragraphs": [
+              "Docker Compose defines the database and Redis. Celery has configuration and a message-cleanup task; no queued itinerary generation was located.",
+              "pgvector appears in dependencies and SQL extension setup; no active vector model or semantic search was located in the inspected code."
+            ],
+            "items": [
+              "Django tests cover models, services, views, sessions, chat, geometry, and AI nodes. The inspected generation tests mock external providers.",
+              "The repository includes browser tests and Locust scenarios. They were not run here; no coverage, load, or reliability results are claimed."
+            ],
+            "sources": []
+          },
+          {
+            "title": "Collaboration and evidenced contributions",
+            "paragraphs": [
+              "A 17-person team, including Alberto Paleteiro, according to information supplied by the owner. Features are described as team work.",
+              "Public history associates STX3837 with merged PR #308 (tour tests) and #436 (API error normalization). They evidence specific contributions, not sole authorship or ownership of an entire module’s design."
+            ],
+            "items": [
+              "Additional responsibilities, coordination, and work not reflected in Git remain to be confirmed.",
+              "No public AURA screenshots or verified production deployment were established in this review."
+            ],
+            "sources": []
+          }
+        ],
+        "references": [
+          {
+            "label": "Django apps / URLconf",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/config/urls.py"
+          },
+          {
+            "label": "Models / GeoDjango",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/rutas/models.py"
+          },
+          {
+            "label": "LangGraph",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/langgraph/graph.py"
+          },
+          {
+            "label": "Generation / sessions",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/services.py"
+          },
+          {
+            "label": "Gemini / routing matrix",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/langgraph/utils.py"
+          },
+          {
+            "label": "OR-Tools",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/langgraph/nodes/optimizacion.py"
+          },
+          {
+            "label": "GraphHopper",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/rutas/graphhopper.py"
+          },
+          {
+            "label": "Frontend",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/templates/base.html"
+          },
+          {
+            "label": "Tours / cache",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/tours/services.py"
+          },
+          {
+            "label": "Celery task",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/tours/tasks.py"
+          },
+          {
+            "label": "Dependencies",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/requirements.txt"
+          },
+          {
+            "label": "Compose",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/docker-compose.yml"
+          },
+          {
+            "label": "Database extensions",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/init-extensions.sql"
+          },
+          {
+            "label": "Generation tests",
+            "href": "https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/tests/test_e2e_generacion_ruta_ia.py"
+          },
+          {
+            "label": "STX3837 · PR #308",
+            "href": "https://github.com/G4-AURA/AURA/pull/308"
+          },
+          {
+            "label": "STX3837 · PR #436",
+            "href": "https://github.com/G4-AURA/AURA/pull/436"
+          }
+        ],
+        "evidenceNote": "Static inspection of the team repository pinned to commit 3c5e491. The application, external services, and test suites were not run. The 17-person team size was supplied by the owner; individual contributions are limited to the cited public evidence."
       }
-    }
+    },
+    "repository": "https://github.com/G4-AURA/AURA",
+    "repositoryLabel": {
+      "es": "Equipo AURA",
+      "en": "AURA team"
+    },
+    "technologies": [
+      "Python",
+      "Django",
+      "GeoDjango",
+      "PostgreSQL",
+      "PostGIS",
+      "pgvector",
+      "Bootstrap 5",
+      "Leaflet.js",
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "LangGraph",
+      "Gemini",
+      "OR-Tools",
+      "GraphHopper",
+      "Mapbox",
+      "Celery",
+      "Redis",
+      "Docker",
+      "Docker Compose"
+    ]
   }
 ];

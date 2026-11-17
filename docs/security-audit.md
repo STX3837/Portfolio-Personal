@@ -55,4 +55,41 @@ Las revisiones de compatibilidad cubren el nuevo orden de scripts, i18n sin pref
 
 ## Seguimiento
 
+### Actualización de iteración 8 — 17 de noviembre de 2026
+
+El resultado vigente de `npm audit` es **1 vulnerabilidad moderada**, con salida 1, en la dependencia directa Astro 7.4.5. Los resultados de cero avisos anteriores son históricos. Aviso: [GHSA-r3h5-4585-7x3w / CVE-2026-126364](https://github.com/advisories/GHSA-r3h5-4585-7x3w), rango afectado 5.14.3–7.4.6; parche desde 7.4.7. npm propone 7.4.12, fuera de la versión exacta fijada.
+
+El aviso describe lectura de archivos mediante el endpoint de imágenes bajo demanda con adaptador Node, sistema de archivos sensible a mayúsculas y directorios hermanos con variaciones de capitalización. Se verificó `output: 'static'`, ausencia de adaptador SSR y de `@astrojs/node` instalado; ese endpoint no forma parte del despliegue estático comprobado. Esta menor exposición no elimina el aviso de la dependencia.
+
+Se conserva 7.4.5 por restricción explícita de la iteración. No se modificaron package.json, lockfile ni dependencias, no se usaron overrides ni audit fix --force. Queda pendiente autorizar una actualización de parche, repetir auditoría y regresión antes del despliegue. La inspección del repositorio AURA no constituye una auditoría de sus dependencias ni ejecución de sus servicios.
+
 Usar Node 22.23.4 o posterior dentro de la rama 22 también en Vercel, configurar el `SITE_URL` real y volver a ejecutar auditoría y pruebas cuando se actualicen dependencias. La versión directa de Astro queda fijada en `7.4.5` para que futuras actualizaciones sean explícitas. No se ha verificado un despliegue remoto.
+
+## Iteración 9 — estado vigente, 17 de noviembre de 2026
+
+Astro actualizado de **7.4.5 a 7.4.12**, último parche estable 7.4.x publicado en npm al consultar. Versión directa exacta, sin migración mayor. El aviso oficial [GHSA-r3h5-4585-7x3w / CVE-2026-126364](https://github.com/advisories/GHSA-r3h5-4585-7x3w) afecta hasta 7.4.6 y queda corregido desde 7.4.7; por tanto 7.4.12 incorpora el parche. El requisito de Astro sigue siendo Node >=22.23.4 y npm >=9.6.5. El proyecto conserva >=22.23.4 <23 y .nvmrc 22.23.4; verificado con Node 22.23.4 y npm 10.9.9.
+
+Se ejecutó npm install astro@7.4.12 --save-exact y después **npm ci --include=optional**: instalación limpia correcta, 270 paquetes añadidos, sin avisos de engine ni bindings. No se borró el lockfile, no se añadieron dependencias directas, overrides ni adaptadores y no se usó audit fix --force.
+
+**npm audit --json tras npm ci: salida 0, cero vulnerabilidades directas o transitivas notificadas.** El JSON está en .verification/iteration-9/audit.json, excluido de Git. El aviso moderado de iteración 8 y los estados de versiones anteriores se conservan como historial; este apartado los sustituye como estado vigente. No es una garantía frente a vulnerabilidades desconocidas o publicadas después de esta consulta.
+
+Cambios transitivos resueltos por Astro y sus rangos:
+
+| Paquete o familia | Antes | Después |
+| --- | --- | --- |
+| @astrojs/internal-helpers | 0.13.0 | 0.13.2 |
+| @astrojs/markdown-satteri | 0.4.6 | 0.4.10 |
+| satteri y bindings de plataforma | 0.10.5 | 0.11.7 |
+| Vite | 8.3.5 | 8.3.8 |
+| Rolldown y bindings de plataforma | 1.2.16 | 1.2.19 |
+| cookie | 2.0.1 | 2.0.2 |
+| mdast-util-to-hast | 13.2.1 | 13.2.2 |
+| p-queue | 9.3.5 | 10.0.0 |
+| vfile-message | 4.0.3 | 4.0.4 |
+| @astrojs/runtime | No instalado | 0.1.1 |
+| @astrojs/vite-plugin-astro | No instalado | 0.1.3 |
+| mri | No instalado | 1.2.0 |
+
+El cambio de major de p-queue es transitivo requerido por el nuevo árbol, no una migración del portfolio ni un override. Desaparecen eventemitter3 y p-timeout; se actualizan/incorporan variantes opcionales de plataforma y sus runtimes WASM. El detalle completo por ruta está en el diff de package-lock.json y el registro local .verification/iteration-9/dependency-changes.json. sharp 0.35.5, esbuild 0.28.2, zod 4.6.7, TypeScript y @astrojs/check permanecen sin cambios; zod-to-ts sigue ausente.
+
+Se comprobó que @astrojs/node no está instalado, que no hay adaptador en astro.config.mjs y que output sigue siendo static. No cambia la exposición del hosting: solo se publican archivos de dist. Pasan los controles de privacidad sobre public y dist. Los resultados de regresión completos y límites figuran en production-readiness.md. No se ejecutaron los servicios de los proyectos ni se modificó ningún repositorio externo.

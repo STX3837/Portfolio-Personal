@@ -66,6 +66,11 @@ try {
         await evaluate("Promise.all([...document.images].map(image => { image.loading = 'eager'; return image.decode(); }))");
         assert.equal(await evaluate("document.querySelectorAll('.project-art').length"), path.includes('/projects/') ? 1 : 3, 'Conceptual fallback without configured screenshots');
         if (path.endsWith('/projects/distans/')) {
+          const context = await evaluate("Array.from(document.querySelectorAll('.project-context li'), item => item.textContent)");
+          assert.equal(context.length, 3);
+          assert.equal(context[2], path.startsWith('/en/') ? 'Grade: 8.6/10' : 'Calificación: 8,6/10');
+          assert.equal(context[1], path.startsWith('/en/') ? 'Developed by a two-person team' : 'Desarrollado por dos personas');
+          assert.equal(await evaluate("Array.from(document.querySelectorAll('.implementation-card')).some(card => card.textContent.includes('8,6/10') || card.textContent.includes('8.6/10'))"), false, 'No per-implementation grade');
           const screenshots = await evaluate(`Array.from(document.querySelectorAll('.screenshot-with-caption img'), image => ({
             src: image.getAttribute('src'), alt: image.alt, width: image.naturalWidth, height: image.naturalHeight,
             declaredWidth: Number(image.getAttribute('width')), declaredHeight: Number(image.getAttribute('height')),
@@ -102,6 +107,12 @@ try {
           }
           assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('.implementation-gallery'), group => ({id:group.dataset.implementation,count:group.querySelectorAll('img').length}))"), [{id:'dashboard',count:2},{id:'manual-flow',count:2},{id:'provisioning',count:2}]);
         }
+        if (path.endsWith('/projects/aura/')) {
+          assert.equal(await evaluate("document.querySelector('.project-context').textContent"), path.startsWith('/en/') ? 'Collaborative project · 17-person team' : 'Proyecto colaborativo · Equipo de 17 personas');
+          assert.equal(await evaluate("document.querySelector('.detail-heading .actions a').getAttribute('href')"), 'https://github.com/G4-AURA/AURA');
+          assert.equal(await evaluate("document.querySelectorAll('.project-key-points article').length"), 3);
+          assert.equal(await evaluate("document.querySelectorAll('img, .interface-gallery').length"), 0);
+        }
         // Technical content must also fit when readers open the native disclosures.
         if (path.includes('/projects/')) await evaluate("document.querySelectorAll('.technical-section').forEach(section => section.open = true)");
         const result = await evaluate(`(() => {
@@ -135,7 +146,7 @@ try {
         assert.equal(result.theme, theme); assert.equal(result.lang, path.startsWith('/en/') ? 'en' : 'es');
         assert.deepEqual(result.contrastFailures, [], `Text contrast: ${path}, ${width}, ${theme}`);
         assert.equal(result.mobile, width <= 620); assert.equal(result.desktop, width > 620);
-        if (path === '/' || ((width === 320 || width === 1440) && path === '/en/') || ([375,768,1440].includes(width) && (path.endsWith('/projects/distans/') || path.endsWith('/projects/puerto-dataspace-edc/')))) {
+        if (path === '/' || ((width === 320 || width === 1440) && path === '/en/') || ([375,768,1440].includes(width) && (path.endsWith('/projects/distans/') || path.endsWith('/projects/puerto-dataspace-edc/') || path.endsWith('/projects/aura/')))) {
           // Capture the default reading experience; expanded disclosures were checked above.
           await evaluate("document.querySelectorAll('.technical-section').forEach(section => section.open = false)");
           const metrics = await send('Page.getLayoutMetrics');
@@ -184,6 +195,14 @@ try {
   await until(() => evaluate("document.querySelector('.technical-references').open"));
   await pressEnter();
   await until(() => evaluate("!document.querySelector('.technical-references').open"));
+  await navigate('/projects/aura/');
+  await evaluate("document.querySelector('.back-link').focus()");
+  await send('Input.dispatchKeyEvent', {type:'keyDown',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
+  await send('Input.dispatchKeyEvent', {type:'keyUp',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
+  assert.equal(await evaluate("document.activeElement.getAttribute('href')"),'https://github.com/G4-AURA/AURA','Keyboard reaches AURA team repository');
+  assert.equal(await evaluate("getComputedStyle(document.activeElement).outlineStyle !== 'none'"),true,'AURA visible link focus');
+  await evaluate("document.querySelector('.technical-references summary').focus()");
+  await pressEnter(); await until(()=>evaluate("document.querySelector('.technical-references').open"));
   await navigate('/projects/puerto-dataspace-edc/');
   await evaluate("document.querySelector('.detail-heading .actions a:last-child').focus()");
   for (let index=0;index<6;index++) {

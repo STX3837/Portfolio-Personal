@@ -13,7 +13,7 @@ const { locale, project } = Astro.props;
 const t = copy[locale];
 const content = project.content[locale];
 const index = projects.findIndex(item => item.slug === project.slug);
-const repositories = project.repositories ?? (project.repository ? [{ label: 'GitHub', href: project.repository }] : []);
+const repositories = project.repositories ?? (project.repository ? [{ label: project.repositoryLabel?.[locale] ?? 'GitHub', href: project.repository }] : []);
 const heroTags = project.tags.slice(0, 6);
 ---
 <BaseLayout locale={locale} path={`projects/${project.slug}/`} title={`${content.title} | ${t.projects} | ${profile.name}`} description={content.description}>
@@ -21,6 +21,7 @@ const heroTags = project.tags.slice(0, 6);
     <a class="back-link" href={`${localizedPath(locale)}#projects`}>← {t.back}</a>
     <header class="detail-heading">
       <div><p class="eyebrow">{t.projects} / 0{index + 1}</p><h1>{content.title}</h1><p class="hero-description">{content.description}</p>
+        {content.context && <ul class="project-context" aria-label={t.projectContext}>{content.context.map(label => <li>{label}</li>)}</ul>}
         <ul class="tags hero-tags" aria-label={t.technologies}>{heroTags.map(tag => <li>{tag}</li>)}</ul>
         <div class="actions">{repositories.map((repository, repositoryIndex) => <a class:list={['button', repositoryIndex === 0 ? 'primary' : 'secondary']} href={repository.href} target="_blank" rel="noopener noreferrer">{t.viewCode} {repository.label} ↗</a>)}{project.website && <a class="button secondary" href={project.website}>{content.title} ↗</a>}</div>
       </div>

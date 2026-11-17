@@ -6,7 +6,7 @@ Perfil: **Ingeniero del Software | Full-stack Developer** / **Software Engineer 
 
 ## Requisitos y desarrollo
 
-Node.js **22.23.4 o posterior dentro de la rama 22**, npm y Git. Astro **7.4.5**, verificado con Node **22.23.4**. `.nvmrc` fija esa versión. Node 20.11 no es compatible; en Vercel selecciona **22.x** con parche al menos **22.23.4**.
+Node.js **22.23.4 o posterior dentro de la rama 22**, npm y Git. Astro **7.4.12**, verificado con Node **22.23.4**. `.nvmrc` fija esa versión. Node 20.11 no es compatible; en Vercel selecciona **22.x** con parche al menos **22.23.4**.
 
 ```sh
 npm ci
@@ -60,7 +60,7 @@ Edita `src/i18n/ui.ts` para los textos de interfaz en ambos idiomas. El contenid
 
 Para añadir un proyecto, incorpora un objeto con slug único, etiquetas y contenido completo en `es` y `en`. Las dos rutas `[slug].astro` usan `getStaticPaths()` para generar las páginas automáticamente. El selector conserva el proyecto equivalente y el fragmento de sección. Añade `repository` y `website` únicamente con URLs reales; `results` es opcional y debe contener resultados documentados. `technologies` permite ampliar las etiquetas de la ficha; `sections` añade apartados desplegables con fuentes; `comparison` contiene la tabla Django/FastAPI. `implementations` presenta los dos bloques de implementación; `concurrency` describe el caso visible; `keyPoints` resume otras fichas. Las referencias se agrupan en un desplegable secundario. Cada idioma incluye `evidenceNote` para explicar el alcance de la verificación.
 
-Las ilustraciones geométricas CSS se etiquetan como conceptuales; no son capturas ni documentación real de los sistemas. DISTANS reúne las implementaciones Django y FastAPI, ambas inspeccionadas y enlazadas. Su caso de estudio muestra las estrategias de reserva de stock y una comparación basada en código. Puerto EDC explica un demostrador local con datos mock y condiciones de acceso de la demo. AURA distingue alcance declarado de implementación pendiente de confirmar. Las fuentes fijadas a commits, limitaciones y datos pendientes están en [docs/project-evidence.md](docs/project-evidence.md). No se ejecutaron las aplicaciones externas ni sus suites de pruebas.
+Las ilustraciones geométricas CSS se etiquetan como conceptuales; no son capturas ni documentación real de los sistemas. DISTANS reúne las implementaciones Django y FastAPI, ambas inspeccionadas y enlazadas. Su caso de estudio muestra las estrategias de reserva de stock y una comparación basada en código. Puerto EDC explica un demostrador local con datos mock y condiciones de acceso de la demo. AURA se documenta mediante revisión estática del repositorio del equipo, con atribución colaborativa y límites explícitos. Las fuentes fijadas a commits, limitaciones y datos pendientes están en [docs/project-evidence.md](docs/project-evidence.md). No se ejecutaron las aplicaciones externas ni sus suites de pruebas.
 
 ## Enlaces personales y CV
 
@@ -254,3 +254,28 @@ Para las pruebas con preview en otro puerto: `$env:PREVIEW_URL = 'http://127.0.0
 
 
 Resultados reales: `npm test`, `npm run check` (31 archivos sin diagnósticos), `npm run build` (8 páginas), `npm run check:build` (174 enlaces/recursos), SEO con y sin origen de prueba, `npm audit` (0 avisos) y `npm run check:browser` (96 casos) correctos. Public/dist no contienen los doce originales conocidos ni rutas de respaldo. Pasan las pruebas negativas del control de privacidad. Se generaron 40 PNG; se revisó EDC en 375/768/1440 px y ambos temas. Siguen pendientes lectores de pantalla, otros motores y dispositivos físicos. Los detalles de selección y resultados están en [production-readiness.md](docs/production-readiness.md). Sin commit ni despliegue.
+
+
+## Iteración 8 — AURA y contexto académico de DISTANS
+
+AURA enlaza al [repositorio del equipo](https://github.com/G4-AURA/AURA) y se presenta como copiloto para guías turísticos, desarrollado por 17 personas según información del propietario. La ficha muestra tres ejes: arquitectura Django, planificación IA y geografía/optimización; los detalles y fuentes están en los desplegables existentes. La revisión está fijada al commit `3c5e491d019ff5606a397c59485a531f447feed0`. No se ejecutó AURA ni se añadieron sus dependencias al portfolio.
+
+Se verificaron código Django/GeoDjango, LangGraph, Gemini, OR-Tools, mapas Leaflet, templates Bootstrap y clientes geográficos. Los checkpoints están en la sesión Django. Celery/Redis y pgvector tienen configuración/dependencias, pero no se afirma generación IA encolada ni búsqueda vectorial activa. STX3837 figura como autor de PR integrados sobre pruebas de tours (#308) y normalización de errores API (#436): se reconocen esas aportaciones sin atribuir el producto o módulos completos a una sola persona. AURA conserva su ilustración conceptual sin galería vacía ni demo inventada.
+
+DISTANS añade tres etiquetas discretas: Trabajo de Fin de Grado, autoría de dos personas y calificación 8,6/10 (8.6/10 en inglés). Son datos aportados por el propietario, no acreditados mediante expediente en esta revisión. La nota corresponde al TFG general; queda pendiente confirmar el alcance exacto de la evaluación y no se asigna una calificación independiente a cada versión. Conserva sus cinco capturas y contenido técnico. EDC conserva datos, seis capturas saneadas y controles de privacidad sin modificaciones.
+
+`ProjectContent.context` centraliza etiquetas localizadas; `Project.repositoryLabel` permite identificar el enlace como repositorio de equipo. Se renderizan en `ProjectDetail.astro` con CSS nativo. No cambian rutas, arquitectura, dependencias ni configuración de despliegue. Las fuentes y límites están en [docs/project-evidence.md](docs/project-evidence.md).
+
+Auditoría del 17-11-2026: **un aviso moderado en Astro 7.4.5**, [GHSA-r3h5-4585-7x3w](https://github.com/advisories/GHSA-r3h5-4585-7x3w). Afecta al endpoint de imágenes con renderizado bajo demanda y adaptador Node en las condiciones descritas por el aviso. Este portfolio usa SSG, no instala `@astrojs/node` ni configura ese endpoint en su salida estática. El aviso permanece en npm audit: no se declara cero vulnerabilidades. La corrección está publicada desde Astro 7.4.7; se mantiene 7.4.5 por la restricción de esta iteración. No se usó audit fix --force ni se cambiaron versiones. Revisar una actualización de parche antes de publicar.
+
+Verificación de iteración 8 (Node 22.23.4): npm test, check (31 archivos sin diagnósticos), build (ocho páginas), check:build (174 enlaces/recursos) y check:browser (96 casos) correctos. SEO comprobado con y sin dominio reservado de prueba. Se generaron 52 PNG en .verification/iteration-8; revisión visual de DISTANS y AURA en 375/768/1440, ambos temas. npm audit conserva un aviso moderado en Astro, documentado arriba. Los resultados históricos de cero avisos no describen la auditoría actual. Detalles, límites y pendientes en docs/production-readiness.md. Sin commit ni despliegue.
+
+## Iteración 9 — actualización de seguridad (17-11-2026)
+
+Estado vigente: **Astro 7.4.12**, actualizado desde 7.4.5 al último parche estable 7.4.x consultado en npm. Corrige [GHSA-r3h5-4585-7x3w](https://github.com/advisories/GHSA-r3h5-4585-7x3w), resuelto desde 7.4.7. Node requerido permanece en >=22.23.4 <23; probado con 22.23.4. No cambian proyectos, estilos, imágenes ni configuración SSG; sin adaptador SSR.
+
+Instalación limpia con npm ci --include=optional correcta. npm audit --json devuelve **cero vulnerabilidades** (salida 0). npm test, npm run check (31 archivos sin diagnósticos), npm run build (ocho páginas), npm run check:build (174 enlaces/recursos) y npm run check:browser (96 casos con preview) correctos. SEO verificado con y sin origen reservado de prueba, luego restaurado dist sin ese dominio. Se conservan las cinco imágenes DISTANS, seis EDC saneadas, fallback AURA y barreras de privacidad. Los avisos y restricciones de Astro 7.4.5 en apartados de iteraciones anteriores son históricos, sustituidos por este resultado.
+
+Solo se modificaron package.json, package-lock.json y estos tres documentos de entrega: README.md, docs/security-audit.md y docs/production-readiness.md. Los cambios pendientes de iteración 8 se conservan. Detalles de dependencias en [security-audit.md](docs/security-audit.md) y pruebas/límites/pasos para publicar en [production-readiness.md](docs/production-readiness.md).
+
+Apto técnicamente para publicación estática; falta configurar el SITE_URL HTTPS real y Node 22.x compatible en Vercel, repetir verificaciones con ese dominio y revisar el hosting cuando se autorice publicar. Sin commit ni despliegue.

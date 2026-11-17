@@ -1,6 +1,6 @@
 # Evidencias del contenido profesional
 
-Revisión: **4 de noviembre de 2026**. Rama de portfolio: `content/professional-projects`.
+Última revisión de contenido: **17 de noviembre de 2026**. Rama de portfolio: `content/professional-projects`.
 
 Se inspeccionaron copias de solo lectura de los repositorios públicos. No se ejecutó código de esas aplicaciones, ni Pytest, Locust, Gradle, scripts PowerShell externos, contenedores o llamadas a Stripe. Los tests del portfolio se documentan por separado. No se modificaron repositorios externos ni se copiaron configuraciones con credenciales.
 
@@ -8,6 +8,7 @@ Se inspeccionaron copias de solo lectura de los repositorios públicos. No se ej
 
 - DISTANS Django: commit `a61fb698d1b59dec00cdced017dbddbb565b557e`.
 - DISTANS FastAPI: commit `21779c98d258f5f2a69313d2fa1b4b4bb2589ba4`.
+- AURA: commit `3c5e491d019ff5606a397c59485a531f447feed0`.
 - Puerto Dataspace EDC: commit `197a47536ab2f1154b7308f1c19722429d1f74fb`.
 
 Los enlaces de archivo usan esos commits para que las afirmaciones sean reproducibles aunque cambie main. Las copias de investigación están en `.verification/content-research/`, ignorado por Git; no forman parte de la entrega pública.
@@ -71,13 +72,55 @@ Cobertura de la inspección: README.md, SERVICIO.md, build.gradle.kts, los tres 
 
 Pendiente: ejecutar la infraestructura y las suites en un entorno apropiado; revisar límites de identidad y seguridad si el prototipo evoluciona a producción. La documentación pública del portfolio deja explícitos los mocks, los servicios locales y la excepción de rol de la demo.
 
-## AURA
+## AURA — revisión estática, iteración 8 (2026-11-17)
 
-| Afirmación | Tipo de evidencia | Fuente | Estado / pendiente |
+Repositorio de equipo: https://github.com/G4-AURA/AURA. Revisión fijada al commit **3c5e491d019ff5606a397c59485a531f447feed0** de main. Se consultaron README, dependencias, configuración, apps, modelos, servicios, templates, pruebas y documentación; no se ejecutó código de AURA ni se instalaron sus dependencias. La copia y metadatos públicos de PR consultados están en `.verification/content-research/`, excluidos de Git y de dist. No se copiaron imágenes ni configuraciones de AURA a public.
+
+Esta revisión sustituye el estado anterior «sin repositorio» de las iteraciones históricas.
+
+| Afirmación | Fuente permanente | Evidencia | Límite |
 | --- | --- | --- | --- |
-| Planificador orientado a itinerarios personalizados con modelos de lenguaje y datos geográficos | Propietario | Solicitud de iteración 3 | Alcance declarado, sin código inspeccionado |
-| Preferencias, rutas, destinos y diseño responsive | Propietario | Solicitudes originales y de iteración 3 | No se diferencia como implementado o previsto hasta confirmación |
-| Proveedor de IA, modelo, librerías, arquitectura, tests y despliegue | Pendiente | No se aportó repositorio | No se inventan tecnologías, resultados, usuarios, enlaces ni métricas |
+| Arquitectura y apps Django | [config/urls.py](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/config/urls.py) | Creación, rutas, tours, allowList y billing; endpoints y templates. | Verificado en código; no se arrancó el servidor. |
+| Datos geográficos | [rutas/models.py](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/rutas/models.py) | Guía, Ruta, Parada y Curiosidad; PointField y LineStringField con GeoDjango. | PostGIS configurado en settings; sin consultas ejecutadas. |
+| Flujo IA | [creacion/langgraph/graph.py](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/langgraph/graph.py) | StateGraph: generación → validación → scoring → optimización. | Grafo ejecutable, no grafo de conocimiento; compile() sin checkpointer persistente. |
+| POI curados y Gemini | [creacion/langgraph/nodes/generacion.py](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/langgraph/nodes/generacion.py) | Prioriza allowlist; Gemini completa una lista parcial; sin puntos locales puede rechazarse la ciudad. | No se afirma que siempre invoque el LLM. |
+| Cliente Gemini y matriz | [creacion/langgraph/utils.py](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/langgraph/utils.py) | Llamadas HTTP a Gemini y matriz Haversine para OR-Tools. | Sin llamadas a proveedores; sin evaluar calidad de resultados. |
+| Checkpoints | [creacion/services.py](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/services.py) | Estado en request.session con UUID, restricciones, propuestas/rechazos y TTL renovable de seis horas. | Reanudación de estado de aplicación; no prueba ejecución duradera de nodos LangGraph. |
+| Generación HTTP | [creacion/views.py](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/views.py) | consultar_langgraph se invoca desde la vista y actualiza checkpoints. | No se localizó encolado Celery de esta generación. |
+| Optimización | [creacion/langgraph/nodes/optimizacion.py](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/langgraph/nodes/optimizacion.py) | RoutingIndexManager/RoutingModel y PATH_CHEAPEST_ARC; conserva orden si no hay solución. | Heurística: no acredita óptimo global ni rendimiento medido. |
+| Geometría de caminos | [rutas/graphhopper.py](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/rutas/graphhopper.py) | Cliente HTTP GraphHopper; rutas/services.py calcula y persiste geometría y métricas. | Integración condicionada a configuración/disponibilidad; no se ejecutó. |
+| Frontend | [templates/base.html](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/templates/base.html) | Bootstrap 5.3.3 y Leaflet 1.9.4; HTML/CSS/JavaScript y templates Django. | Tecnologías de AURA, no dependencias añadidas al portfolio. |
+| Tours y caché | [tours/services.py](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/tours/services.py) | Sesiones, permisos, participantes, chat y snapshots; invalidación por signals. | Redis es backend configurable, no despliegue confirmado. |
+| Celery | [tours/tasks.py](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/tours/tasks.py) | Tarea declarada para limpiar mensajes de sesiones finalizadas; config/celery.py y settings configuran broker Redis. | No se encontró invocación encolada del flujo IA; worker real no verificado. |
+| pgvector | [init-extensions.sql](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/init-extensions.sql) | Extensión vector habilitada; requirements incluye pgvector. | Infraestructura confirmada; no se localizó VectorField, embeddings o búsqueda semántica activa. |
+| Facturación | [billing/services.py](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/billing/services.py) | Funciones de checkout/suscripción y verificación de firma Stripe. | Código existente; sin procesar pagos ni comprobar credenciales. |
+| Servicios locales | [docker-compose.yml](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/docker-compose.yml) | Compose define servicios db y Redis; configuración de DB en Dockerfile.db. | No se levantaron contenedores. |
+| Pruebas IA | [creacion/tests/test_e2e_generacion_ruta_ia.py](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/creacion/tests/test_e2e_generacion_ruta_ia.py) | Casos de generación, validación, optimización, persistencia y checkpoints con proveedores simulados. | Suite inspeccionada, no ejecutada; sus nombres no acreditan resultados. |
+| Pruebas de tours | [tours/tests/test_tasks_unitarios.py](https://github.com/G4-AURA/AURA/blob/3c5e491d019ff5606a397c59485a531f447feed0/tours/tests/test_tasks_unitarios.py) | Pruebas de tareas y ficheros hermanos de modelos/servicios/vistas/chat; tests/e2e y locustfile.py presentes. | No se ejecutaron pruebas AURA, E2E ni carga; sin cifras de cobertura. |
+
+Distinción de madurez: generación, edición, sesiones, chat y mapas están respaldados por código. pgvector y Celery/Redis tienen dependencias/configuración verificadas, pero no se presentan como búsqueda semántica o generación asíncrona acreditadas. El README incluye una explicación conceptual y referencias antiguas al nombre de entrega; esas menciones no se usan para acreditar despliegue ni funcionalidades adicionales. No se confirmó una demo pública, madurez productiva, ejecución de workers, garantías de calidad de IA o rendimiento. Se mantienen como pendientes, no como logros.
+
+### Trabajo colaborativo y aportaciones
+
+El equipo de **17 personas, incluido Alberto Paleteiro**, es información confirmada por el propietario en la solicitud de iteración 8. No se deduce del número de autores Git ni se atribuye el producto a una persona.
+
+La API pública de GitHub identifica a **STX3837** como autor de los PR siguientes y confirma que fueron integrados. Se consultaron sus listas de archivos; el código actual correspondiente también fue inspeccionado:
+
+| Evidencia | Cambio acreditado | Límite de atribución |
+| --- | --- | --- |
+| [PR #308](https://github.com/G4-AURA/AURA/pull/308) | Pruebas en tours: modelos, servicios, señales, tareas, vistas y chat API. | Aportación a pruebas; no acredita autoría de todas las funciones probadas. |
+| [PR #436](https://github.com/G4-AURA/AURA/pull/436) | Contrato de errores API, middleware, configuración y tests de middleware. | Aportación a uniformidad de errores; no responsabilidad exclusiva sobre la arquitectura. |
+| [PR #120](https://github.com/G4-AURA/AURA/pull/120) | Cambios de chat/mapa turista, vistas, templates y migraciones. | Cambio amplio y colaborativo; no se atribuye la totalidad del frontend o módulo tours. |
+
+Se inspeccionó también el historial local filtrado por STX3837. La obtención de algunos diffs históricos en el clon parcial encontró la restricción de red del entorno; se contrastaron mediante la API de PR. No se usaron solo mensajes de commit como prueba de diseño. Las dos primeras aportaciones se citan en la ficha; no se usa un merge como prueba de responsabilidad exclusiva. Quedan por confirmar responsabilidades adicionales, coordinación y trabajo no reflejado en Git. No se publican emails ni datos de terceros.
+
+## DISTANS — contexto académico aportado por el propietario (iteración 8)
+
+- Es su Trabajo de Fin de Grado.
+- Fue desarrollado conjuntamente por dos personas, incluido el propietario.
+- Calificación global del TFG: **8,6/10** (EN: **8.6/10**).
+
+Fuente: solicitud explícita del propietario del 17 de noviembre de 2026. Estos datos no se obtuvieron de los repositorios y no se presentan como verificados mediante expediente, certificado o memoria académica. No se inventa el nombre del coautor. El alcance exacto de la evaluación respecto a Django/FastAPI queda pendiente: la nota aparece una vez en el contexto del TFG y no en las tarjetas de cada versión. El contenido técnico, cinco capturas, diagrama, pagos, pruebas y enlaces permanece íntegro.
 
 ## Presentación pública
 
@@ -138,3 +181,5 @@ Se inspeccionaron doce PNG aportados por el propietario y se publicaron seis cop
 La ejecución mostrada en el dashboard figura como `smoke_only`: sus resultados `SUCCESS`, `READY_FOR_PICKUP` y estados `CLEARED` se conservan sin atribuir ejecución a las etapas `SKIPPED`. El flujo manual muestra negociación `FINALIZED`, transferencia `STARTED`, EDR obtenido y dato `CLEARED`; iniciar una transferencia no demuestra que su proceso esté finalizado. Las pantallas de provisioning muestran relaciones entre activos y políticas de demostración, no despliegues productivos.
 
 Las copias públicas ocultan valores operativos sensibles; no se alteraron resultados ni se generaron pantallas ficticias. La selección y las verificaciones del portfolio están documentadas en `production-readiness.md`. No se infiere rendimiento, seguridad integral ni conexión con autoridades públicas a partir de estas imágenes.
+
+Verificación de iteración 8 (Node 22.23.4): npm test, check (31 archivos sin diagnósticos), build (ocho páginas), check:build (174 enlaces/recursos) y check:browser (96 casos) correctos. SEO comprobado con y sin dominio reservado de prueba. Se generaron 52 PNG en .verification/iteration-8; revisión visual de DISTANS y AURA en 375/768/1440, ambos temas. npm audit conserva un aviso moderado en Astro, documentado arriba. Los resultados históricos de cero avisos no describen la auditoría actual. Detalles, límites y pendientes en docs/production-readiness.md. Sin commit ni despliegue.

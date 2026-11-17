@@ -1126,3 +1126,6 @@ button[hidden] {
 
 .gallery-readable .interface-grid { grid-template-columns:1fr; }
 .gallery-readable .implementation-gallery > p { max-width:850px; margin:0; }
+
+.project-context { display:flex; flex-wrap:wrap; gap:8px 18px; list-style:none; padding:0; margin:20px 0; font-size:13px; line-height:1.8; color:var(--muted); }
+.project-context li { max-width:100%; }

@@ -42,6 +42,9 @@ for (const [route, { html, ids }] of pages) {
   if (route === '/projects/distans/' || route === '/en/projects/distans/') {
     for (const repo of ['Distans-Django', 'Distans-FastAPI']) check(html.includes(`href="https://github.com/STX3837/${repo}"`), `DISTANS repository ${repo}`);
     check(html.includes('id="concurrency-title"'), 'visible concurrency case');
+    check(html.includes('class="project-context"'), 'DISTANS academic context');
+    check(html.includes(route.startsWith('/en/') ? 'Grade: 8.6/10' : 'Calificación: 8,6/10'), 'localized TFG grade');
+    check(html.includes(route.startsWith('/en/') ? 'Developed by a two-person team' : 'Desarrollado por dos personas'), 'joint authorship');
     check(html.includes('id="comparison-title"'), 'comparison table');
     check(html.includes('class="technical-section technical-references"'), 'secondary technical references');
     const screenshots = [...html.matchAll(/<img\b[^>]*>/g)].map(m => m[0]);
@@ -63,6 +66,13 @@ for (const [route, { html, ids }] of pages) {
       check(attr(image, 'alt')?.length > 40, 'EDC descriptive alt');
     }
     check(html.includes('smoke test') && html.includes('SKIPPED') && html.includes('STARTED'), 'execution limitations retained');
+  }
+  if (route.endsWith('/projects/aura/')) {
+    check(html.includes('href="https://github.com/G4-AURA/AURA"'), 'AURA team repository');
+    check(html.includes(route.startsWith('/en/') ? 'Collaborative project · 17-person team' : 'Proyecto colaborativo · Equipo de 17 personas'), 'team attribution');
+    check(!html.includes('<img') && !html.includes('interface-gallery'), 'AURA keeps conceptual visual without gallery');
+    check(html.includes('LangGraph') && html.includes('OR-Tools') && html.includes('PostGIS'), 'verified AURA stack');
+    check(html.includes('/pull/308') && html.includes('/pull/436'), 'scoped contribution evidence');
   }
   check(html.includes(`<html lang="${route.startsWith('/en/') ? 'en' : 'es'}"`), 'language');
   check((html.match(/<h1\b/g) || []).length === 1, 'one h1');

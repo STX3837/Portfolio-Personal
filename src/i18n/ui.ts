@@ -1,6 +1,7 @@
 export type Locale = 'es' | 'en';
 export const copy = {
  es: {
+ projectContext: 'Contexto del proyecto',
  interfacesTitle: 'DISTANS en funcionamiento',
  role: 'Ingeniero del Software | Full-stack Developer', headline: 'Desarrollo software para resolver problemas reales.',
  intro: 'Soy ingeniero del software orientado al desarrollo full-stack. Diseño y construyo aplicaciones web, trabajando desde la arquitectura y la lógica de negocio hasta las interfaces, las bases de datos y la integración de servicios.',
@@ -13,6 +14,7 @@ export const copy = {
  problem: 'El problema', solution: 'La solución', features: 'Características principales', architecture: 'Arquitectura técnica', challenges: 'Retos de implementación', results: 'Resultados documentados', documentation: 'Sobre este caso', documentationNote: 'Este resumen recoge las funcionalidades descritas del proyecto. Los detalles internos de arquitectura, las decisiones de implementación y los resultados quedan pendientes de documentación.', specialization: 'Desarrollo web · Arquitectura · IA aplicada', selected: 'Una selección de trabajo', aboutLabel: 'Enfoque profesional', links: 'Enlaces del proyecto', sources: 'Fuentes de esta sección', concept: 'Ilustración conceptual', comparisonTopic: 'Aspecto', djangoVersion: 'Django', fastapiVersion: 'FastAPI', viewCode: 'Ver código', persistence: 'Persistencia', frontend: 'Frontend', implementationTitle: 'Mismo problema, dos implementaciones', keyPoints: 'Claves del proyecto', technicalDetails: 'Más detalle técnico', references: 'Referencias técnicas', fullStack: 'Tecnologías del proyecto', testing: 'Pruebas y evidencias', conclusion: 'Qué demuestra este proyecto', scope: 'Alcance',
  },
  en: {
+ projectContext: 'Project context',
  interfacesTitle: 'DISTANS in action',
  role: 'Software Engineer | Full-stack Developer', headline: 'I build software to solve real problems.',
  intro: 'I’m a software engineer focused on full-stack development. I design and build web applications, working across architecture, business logic, user interfaces, databases, and service integrations.',
