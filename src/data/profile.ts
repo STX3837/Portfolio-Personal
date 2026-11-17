@@ -2,7 +2,11 @@ import { statSync } from 'node:fs';
 import { resolve } from 'node:path';
 // Add only verified public URLs. CV paths are relative to public/.
 export const profile = {
- name: 'Alberto Paleteiro', github: '', linkedin: '', email: '', cv: '',
+ name: 'Alberto Paleteiro',
+ github: 'https://github.com/STX3837',
+ linkedin: 'https://www.linkedin.com/in/alberto-josé-paleteiro-lópez-78a90b413',
+ email: 'alberto.paleteiro.dev@gmail.com',
+ cv: '',
 };
 export const cvUrl = profile.cv && /^[/][a-zA-Z0-9_./-]+$/.test(profile.cv) && !profile.cv.includes('..') && statSync(resolve('public', profile.cv.slice(1)), { throwIfNoEntry: false })?.isFile() ? profile.cv : undefined;
 export const socialLinks = [

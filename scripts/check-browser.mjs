@@ -65,6 +65,19 @@ try {
         await navigate(path);
         await evaluate("Promise.all([...document.images].map(image => { image.loading = 'eager'; return image.decode(); }))");
         assert.equal(await evaluate("document.querySelectorAll('.project-art').length"), path.includes('/projects/') ? 1 : 3, 'Conceptual fallback without configured screenshots');
+        if (path === '/' || path === '/en/') {
+          const contact = await evaluate(`Array.from(document.querySelectorAll('#contact a'), a => ({ href: a.getAttribute('href'), text: a.textContent, label: a.getAttribute('aria-label'), target: a.target, rel: a.rel }))`);
+          for (const href of ['https://github.com/STX3837', 'https://www.linkedin.com/in/alberto-josé-paleteiro-lópez-78a90b413']) {
+            const link = contact.find(a => a.href === href);
+            assert.ok(link?.text.trim(), 'Named contact link');
+            assert.equal(link.target, '_blank');
+            assert.ok(link.rel.includes('noopener') && link.rel.includes('noreferrer'));
+          }
+          const mail = contact.find(a => a.href === 'mailto:alberto.paleteiro.dev@gmail.com');
+          assert.ok(mail?.text.includes('alberto.paleteiro.dev@gmail.com'));
+          assert.equal(mail.label, (path === '/' ? 'Enviar email' : 'Send email') + ': alberto.paleteiro.dev@gmail.com');
+          assert.equal(await evaluate("document.querySelectorAll('a[download]').length"), 0, 'No pending CV download');
+        }
         if (path.endsWith('/projects/distans/')) {
           const context = await evaluate("Array.from(document.querySelectorAll('.project-context li'), item => item.textContent)");
           assert.equal(context.length, 3);
@@ -155,6 +168,11 @@ try {
           const name = `${path.startsWith('/en/') ? 'en' : 'es'}${path.includes('/projects/') ? '-' + path.split('/projects/')[1].split('/')[0] : ''}-${width}-${theme}.png`;
           await writeFile(resolve(output, name), Buffer.from(screenshot.data, 'base64'));
         }
+        if ((path === '/' || path === '/en/') && [375,768,1440].includes(width)) {
+          const clip = await evaluate(`(() => { const r=document.querySelector('#contact').getBoundingClientRect(); return { x:0, y:r.top+scrollY, width:innerWidth, height:document.documentElement.scrollHeight-r.top-scrollY, scale:1 }; })()`);
+          const contactShot = await send('Page.captureScreenshot', { format:'png', captureBeyondViewport:true, clip });
+          await writeFile(resolve(output, `${path === '/' ? 'es' : 'en'}-contact-${width}-${theme}.png`), Buffer.from(contactShot.data,'base64'));
+        }
       }
     }
   }
@@ -168,6 +186,15 @@ try {
   await navigate('/');
   await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
   assert.equal(await evaluate("document.activeElement.classList.contains('skip-link')"), true, 'Keyboard skip link');
+  for (const route of ['/', '/en/']) {
+    await navigate(route);
+    await evaluate("(() => { const a=[...document.querySelectorAll('a')]; a[a.indexOf(document.querySelector('#contact a'))-1].focus(); })()");
+    for (const href of ['mailto:alberto.paleteiro.dev@gmail.com','https://github.com/STX3837','https://www.linkedin.com/in/alberto-josé-paleteiro-lópez-78a90b413']) {
+      await send('Input.dispatchKeyEvent', { type:'keyDown', key:'Tab', code:'Tab', windowsVirtualKeyCode:9 });
+      assert.equal(await evaluate("document.activeElement.getAttribute('href')"), href, 'Contact keyboard order');
+      assert.equal(await evaluate("getComputedStyle(document.activeElement).outlineStyle !== 'none'"), true, 'Contact visible focus');
+    }
+  }
   await navigate('/projects/distans/');
   await evaluate("document.querySelector('.implementation-card:last-child .project-link').focus()");
   for (const file of ['django-catalogo.png', 'django-carrito.png', 'distans-fastapi-catalogue.png', 'distans-fastapi-products.png', 'fastapi-mapa-mobile.png']) {

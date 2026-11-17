@@ -30,6 +30,10 @@ for (const [route, { html, ids }] of pages) {
   const check = (value, message) => assert.ok(value, `${route}: ${message}`);
   check(!/cyber-simulation|Simulador de ciberataques|Cyberattack simulator/i.test(html), 'retired project absent');
   if (route === '/' || route === '/en/') {
+    for (const href of ['https://github.com/STX3837', 'https://www.linkedin.com/in/alberto-josé-paleteiro-lópez-78a90b413', 'mailto:alberto.paleteiro.dev@gmail.com']) {
+      check(html.includes(`href="${href}"`), `confirmed contact ${href}`);
+    }
+    check(!/<a\b[^>]*\bdownload\b/.test(html), 'pending CV has no download link');
     const cards = [...html.matchAll(/<article\b[^>]*class="project-card"[^>]*>([\s\S]*?)<\/article>/g)].map(m => m[1]);
     check(cards.length === 3, 'exactly three featured projects');
     for (const [index, slug] of ['distans', 'puerto-dataspace-edc', 'aura'].entries()) {

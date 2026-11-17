@@ -301,3 +301,36 @@ Artefactos locales ignorados: .verification/iteration-9/audit.json, dependency-c
 La configuración sigue en output: static, sin adaptador SSR y sin @astrojs/node instalado. dist contiene las ocho páginas, endpoints estáticos sitemap/robots y recursos. Las dependencias transitivas y su exposición están documentadas en security-audit.md; no quedan avisos conocidos según la auditoría ejecutada. Se mantiene Node >=22.23.4 <23 y .nvmrc 22.23.4.
 
 Para publicar, cuando se autorice: seleccionar Node 22.x con parche >=22.23.4 en Vercel, configurar SITE_URL con el origen HTTPS definitivo (sin ruta/query/fragmento), usar el vercel.json existente (npm ci, npm run build, dist) y repetir las comprobaciones con ese dominio antes del despliegue. Comprobar entonces dominio, redirecciones, cabeceras y rutas en el hosting real. No se ha validado ni realizado despliegue remoto. Preview local se detuvo al terminar; no se crearon commits ni se modificaron servicios externos. Los pendientes de evidencias académicas y de AURA registrados en iteración 8 siguen vigentes, sin cambiar su documentación.
+
+## Iteración 10 — perfil y preparación de Vercel (17-11-2026)
+
+Estado: **preparado técnicamente, sin publicar**. Árbol inicial limpio, rama content/professional-projects conservada. Astro 7.4.12, Node 22.23.4/npm 10.9.9, TypeScript estricto, CSS nativo y generación estática sin adaptador SSR. No se modificaron dependencias, lockfile, CSS, galerías, contenido técnico de proyectos, config de Astro ni vercel.json.
+
+Datos centralizados en src/data/profile.ts, aportados expresamente por el propietario: GitHub https://github.com/STX3837, LinkedIn https://www.linkedin.com/in/alberto-josé-paleteiro-lópez-78a90b413 y alberto.paleteiro.dev@gmail.com. Los perfiles usan el componente SocialLinks existente en hero, contacto y footer, con nombre visible, target=_blank y rel=noopener noreferrer. El correo visible en contacto usa mailto y etiqueta accesible ES/EN. Se conserva el nombre y posicionamiento profesional existente, coherente con títulos y metadatos. No hay datos estructurados ni imagen social configurados; no se añadieron representaciones ficticias.
+
+LinkedIn conserva exactamente el identificador Unicode suministrado. Se comprobó sintaxis y atributo href renderizado; el navegador puede codificar acentos al navegar. No se realizó petición externa a LinkedIn ni se afirmó una redirección canónica, propiedad del perfil o disponibilidad HTTP. No se enviaron correos ni se comprobó la aplicación de correo del visitante.
+
+CV vacío: no hay descarga ni documento de ejemplo. Para añadirlo, colocar el PDF autorizado en public, configurar su ruta pública en profile.cv (por ejemplo /cv.pdf) y recompilar. La lógica existente verifica que el archivo exista; no se necesita cambiar componentes.
+
+| Comprobación ejecutada | Resultado real |
+| --- | --- |
+| npm ci --include=optional | Correcto, 270 paquetes; lockfile sin cambios |
+| npm audit --json | Salida 0, cero vulnerabilidades notificadas |
+| npm test | Correcto: origen, imágenes y privacidad |
+| npm run check | 31 archivos, cero errores, advertencias e hints |
+| npm run build | Ocho páginas estáticas y controles public/dist correctos |
+| npm run check:build | Ocho páginas, 174 enlaces/recursos/anclas y SEO correctos |
+| SITE_URL de prueba con barra final y VERCEL_ENV=production | Canonical, hreflang, sitemap y og:url correctos sin barras duplicadas; luego dist restaurado sin origen de prueba |
+| npm run check:browser con preview 4347 | 96 casos correctos, ocho páginas × seis anchos × dos temas |
+
+Los scripts amplían la comprobación de GitHub/LinkedIn exactos, correo visible y mailto, nombre accesible traducido, seguridad de enlaces y ausencia de CV descargable. El navegador recorre con Tab los tres enlaces de contacto en ambos idiomas y comprueba foco visible. También pasan navegación/menú/Escape, idiomas/hash, temas/persistencia/sistema/almacenamiento bloqueado, movimiento reducido, contraste DOM y ausencia de desbordamiento a 320/375/430/768/1024/1440. Pasan las cinco imágenes DISTANS, seis EDC saneadas y fallback conceptual AURA. Las rutas conocidas de originales y respaldo siguen devolviendo 404.
+
+Se generaron 64 PNG y browser-results.json en .verification/iteration-10/browser. Se revisaron visualmente inicio y contacto/footer en español a 375/768/1440, ambos temas, y muestras de contacto en inglés. Contacto forma parte de las páginas / y /en/; no se creó una nueva ruta. No fueron necesarios cambios cosméticos. Persisten los límites de accesibilidad: sin certificación, lector de pantalla ni cobertura de todos los motores/dispositivos.
+
+Seguridad: .gitignore excluye node_modules, dist, .astro, .vercel, .verification y .env privados; solo .env.example vacío está versionado. No hay archivos .env reales en la raíz. No se detectaron patrones de claves privadas/tokens GitHub/AWS en src, config, public o configuración de despliegue revisados; es una búsqueda acotada, no una auditoría universal. Pasan los hashes/estructura de seis PNG EDC y exclusión de doce originales conocidos y rutas privadas. La revisión de nombres en public/dist no encontró .verification, env, directorios de originales/respaldos ni archivos pem/key/bak. No se borraron respaldos privados. El correo configurado es deliberadamente público por solicitud del propietario. Sin cambios relevantes de seguridad ni dependencias, security-audit.md conserva el informe de iteración 9; el nuevo resultado de auditoría está aquí y en .verification/iteration-10/audit.json.
+
+SITE_URL y Vercel: se mantiene el mecanismo de process.env.SITE_URL en config/site.mjs; Production exige origen absoluto HTTPS, sin credenciales/ruta/query/fragmento. Sin origen en local se omiten canonical, alternates absolutos y og:url, sitemap vacío y robots sin anunciarlo. El dominio gratuito .vercel.app definitivo sigue pendiente; no se usa VERCEL_URL como sustituto automático. No hay secretos necesarios ni variables privadas nuevas.
+
+Para publicar más adelante: seguir los seis pasos del apartado Vercel del README. Preset Astro; npm ci; npm run build; salida dist; raíz con package.json; Node 22.x, comprobando parche >=22.23.4 en logs; SITE_URL con origen HTTPS que Vercel confirme, ámbito Production, antes del build definitivo. La documentación oficial consultada confirma Node 22.x (parches administrados por Vercel), variables por entorno y SSG sin adaptador: https://vercel.com/docs/functions/runtimes/node-js/node-js-versions, https://vercel.com/docs/environment-variables, https://vercel.com/docs/frameworks/frontend/astro. No se verificó el parche concreto disponible en una cuenta, dominio asignado, DNS/cabeceras o despliegue remoto. Cuando exista dominio, repetir las comprobaciones con él y revisar ocho rutas, SEO, HTTPS y privacidad en el hosting.
+
+Archivos modificados: src/data/profile.ts, src/components/Home.astro, scripts/check-build.mjs, scripts/check-browser.mjs, README.md y docs/production-readiness.md. DISTANS, EDC y AURA, sus referencias y capturas permanecen sin modificaciones; docs/project-evidence.md intacto. Sin conexión a Vercel, registro de dominios, commit, push o despliegue. Preview detenido al terminar. Pendientes: dominio real/configuración de cuenta, CV futuro y comprobaciones remotas cuando el propietario decida publicar.

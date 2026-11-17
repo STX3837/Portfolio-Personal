@@ -66,7 +66,11 @@ Las ilustraciones geométricas CSS se etiquetan como conceptuales; no son captur
 
 Configura `name`, `email`, `github` y `linkedin` en `src/data/profile.ts`. El nombre de títulos y metadatos procede también de este archivo. Los enlaces vacíos se omiten. Sin canales configurados, contacto muestra un mensaje informativo.
 
+Canales confirmados por el propietario: [GitHub STX3837](https://github.com/STX3837), [LinkedIn](https://www.linkedin.com/in/alberto-josé-paleteiro-lópez-78a90b413) y [alberto.paleteiro.dev@gmail.com](mailto:alberto.paleteiro.dev@gmail.com). Los perfiles aparecen en hero, contacto y footer mediante el componente compartido; el correo se muestra en contacto. La URL de LinkedIn conserva su identificador con acentos; se valida su sintaxis y enlace renderizado, sin deducir ni cambiar una URL canónica externa. No se ha comprobado la entrega de correo ni el inicio de sesión en plataformas externas.
+
 Coloca el CV en `public/`, por ejemplo `public/cv.pdf`, y configura `cv: '/cv.pdf'`. El botón aparece únicamente si el archivo existe durante la compilación. Recompila tras añadirlo. Los archivos públicos son descargables por cualquier visitante.
+
+El CV está pendiente: `cv` permanece vacío, sin botón de descarga, archivo de ejemplo ni mensaje de «próximamente».
 
 ## Temas y accesibilidad
 
@@ -91,10 +95,16 @@ Sustituye el valor ilustrativo por tu URL auténtica. Sin `SITE_URL` se omiten c
 
 ## Vercel
 
-1. Sube el repositorio a GitHub e impórtalo en Vercel.
-2. Selecciona el preset Astro y Node 22.x con versión al menos 22.23.4.
-3. Configura `SITE_URL` con el origen de producción.
-4. Usa `npm run build` como compilación y `dist` como salida.
+El dominio gratuito `.vercel.app` definitivo sigue pendiente. No hay una URL de producción configurada ni un despliegue realizado. Los siguientes pasos son para cuando decidas publicar:
+
+1. Revisa los cambios locales y publica tú el repositorio/rama que decidas utilizar. Importa el repositorio en Vercel, seleccionando como Root Directory la carpeta que contiene `package.json`.
+2. En la configuración de importación revisa el nombre de proyecto y el dominio que Vercel asigne/confirme. No derives `SITE_URL` de una URL de preview ni de un nombre supuesto. Si todavía no conoces el dominio asignado, no configures un valor ficticio: la validación impedirá un build de producción sin `SITE_URL`.
+3. Selecciona Framework Preset **Astro**, Install Command **`npm ci`**, Build Command **`npm run build`**, Output Directory **`dist`**. En Settings → Build and Deployment elige Node **22.x**; comprueba en los logs que el parche real cumple `>=22.23.4 <23`. Vercel administra los parches, no permite fijar aquí un parche exacto.
+4. En las variables de entorno de **Production**, configura **`SITE_URL`** con el origen HTTPS confirmado, sin ruta, parámetros, fragmento ni credenciales. No requiere prefijo `PUBLIC_`, tokens ni secretos. La variable se incorpora al compilar; cambiarla exige recompilar. No se genera automáticamente desde `VERCEL_URL`.
+5. Con ese origen conocido, reproduce localmente `npm ci --include=optional`, `npm audit`, `npm test`, `npm run check`, `npm run build` y `npm run check:build`. En otra terminal inicia `npm run preview -- --host 127.0.0.1 --port 4347` y ejecuta `npm run check:browser` con `PREVIEW_URL=http://127.0.0.1:4347`. Exporta `SITE_URL` en la terminal y, para simular Production, `VERCEL_ENV=production`. No basta con crear un `.env` local.
+6. Solo cuando decidas publicar, inicia el despliegue en Vercel. Después comprueba HTTPS, las ocho rutas y recursos, `/sitemap.xml`, `/robots.txt`, canonical/hreflang con el dominio confirmado, contacto y ausencia de rutas privadas. Si cambia el dominio asignado, corrige `SITE_URL` y recompila antes de darlo por terminado.
+
+La configuración existente se conserva. [Astro estático en Vercel](https://vercel.com/docs/frameworks/frontend/astro) no requiere adaptador; Vercel documenta [Node 22.x y sus actualizaciones automáticas](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions) y el [alcance de las variables por entorno](https://vercel.com/docs/environment-variables). Consulta oficial realizada el 17-11-2026; el parche disponible en tu cuenta se comprobará al publicar. Para previews se conserva el comportamiento local sin origen si no configuras `SITE_URL`; no se confunden esas URLs con el dominio de producción.
 
 `vercel.json` fija preset Astro, instalación `npm ci`, compilación `npm run build`, salida `dist` y barra final. No requiere adaptador de servidor. No se ha publicado ni modificado ningún servicio externo. Los [pasos completos de publicación](docs/production-readiness.md) incluyen dominio, variables de entorno, DNS y verificaciones posteriores.
 
@@ -279,3 +289,11 @@ Instalación limpia con npm ci --include=optional correcta. npm audit --json dev
 Solo se modificaron package.json, package-lock.json y estos tres documentos de entrega: README.md, docs/security-audit.md y docs/production-readiness.md. Los cambios pendientes de iteración 8 se conservan. Detalles de dependencias en [security-audit.md](docs/security-audit.md) y pruebas/límites/pasos para publicar en [production-readiness.md](docs/production-readiness.md).
 
 Apto técnicamente para publicación estática; falta configurar el SITE_URL HTTPS real y Node 22.x compatible en Vercel, repetir verificaciones con ese dominio y revisar el hosting cuando se autorice publicar. Sin commit ni despliegue.
+
+## Iteración 10 — perfil listo para publicación
+
+Configurados exclusivamente los canales confirmados del propietario en profile.ts; correo visible con mailto y nombre accesible traducido, perfiles compartidos con enlaces seguros. CV pendiente y oculto. Conservados Astro 7.4.12, SSG, proyectos, imágenes, estilos, lockfile y configuración de dominio/Vercel.
+
+Verificación del 17-11-2026: npm ci --include=optional, npm test, npm run check (31 archivos sin diagnósticos), npm run build (ocho páginas), npm run check:build (174 enlaces/recursos) y npm run check:browser (96 casos) correctos. npm audit: **0 vulnerabilidades**. SITE_URL probado con dominio reservado y barra final, luego retirado de dist. Revisados inicio/contacto en 375/768/1440 px, ambos temas; navegación por teclado y foco de contacto correctos. Artefactos locales ignorados: .verification/iteration-10 (64 PNG). Detalles y límites en [production-readiness.md](docs/production-readiness.md).
+
+El dominio definitivo sigue pendiente. No se ha desplegado ni conectado Vercel; no se han creado commits ni realizado push. Los pasos del apartado Vercel son instrucciones futuras, no acciones ya ejecutadas.
