@@ -1,0 +1,10 @@
+---
+import type { Project } from '../data/projects';
+import type { Locale } from '../i18n/ui';
+import ProjectArt from './ProjectArt.astro';
+import ProjectScreenshot from './ProjectScreenshot.astro';
+interface Props { project: Project; locale: Locale; index?: number; eager?: boolean }
+const { project, locale, index = 0, eager = false } = Astro.props;
+const screenshot = project.screenshot;
+---
+{screenshot ? <ProjectScreenshot image={screenshot} locale={locale} eager={eager} /> : <ProjectArt slug={project.slug} locale={locale} index={index} />}

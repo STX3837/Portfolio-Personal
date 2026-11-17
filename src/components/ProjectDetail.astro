@@ -1,8 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ProjectArt from './ProjectArt.astro';
+import ProjectVisual from './ProjectVisual.astro';
 import ProjectSections from './ProjectSections.astro';
 import ProjectCaseStudy from './ProjectCaseStudy.astro';
+import ProjectGallery from './ProjectGallery.astro';
 import { copy, type Locale } from '../i18n/ui';
 import { projects, type Project } from '../data/projects';
 import { localizedPath } from '../utils/routes';
@@ -23,13 +24,14 @@ const heroTags = project.tags.slice(0, 6);
         <ul class="tags hero-tags" aria-label={t.technologies}>{heroTags.map(tag => <li>{tag}</li>)}</ul>
         <div class="actions">{repositories.map((repository, repositoryIndex) => <a class:list={['button', repositoryIndex === 0 ? 'primary' : 'secondary']} href={repository.href} target="_blank" rel="noopener noreferrer">{t.viewCode} {repository.label} ↗</a>)}{project.website && <a class="button secondary" href={project.website}>{content.title} ↗</a>}</div>
       </div>
-      <ProjectArt locale={locale} slug={project.slug} index={index} />
+      <ProjectVisual project={project} locale={locale} index={index} eager />
     </header>
     <div class="overview-grid"><section><h2>{t.problem}</h2><p>{content.problem}</p></section><section><h2>{content.solutionTitle ?? t.solution}</h2><p>{content.solution}</p></section></div>
     {content.keyPoints && <section class="case-section project-key-points" aria-labelledby="key-points-title"><h2 id="key-points-title">{content.featuresTitle ?? t.keyPoints}</h2><div class="key-points-grid">{content.keyPoints.map((point, pointIndex) => <article><span class="section-number">0{pointIndex + 1}</span><h3>{point.title}</h3><p>{point.text}</p></article>)}</div></section>}
     {content.implementations && <ul class="feature-strip" aria-label={t.features}>{content.features.map(feature => <li>{feature}</li>)}</ul>}
     <section class="case-section project-challenges" aria-labelledby="challenges-title"><h2 id="challenges-title">{t.challenges}</h2><ul>{content.challenges.map(challenge => <li>{challenge}</li>)}</ul></section>
-    <ProjectCaseStudy content={content} locale={locale} />
+    <ProjectCaseStudy content={content} locale={locale} implementationScreenshots={project.implementationScreenshots} />
+    {project.gallery && <ProjectGallery locale={locale} title={project.gallery.title[locale]} wide groups={project.gallery.groups.map(group => ({ id: group.id, title: group.title[locale], description: group.description[locale], note: group.note?.[locale], images: group.images }))} />}
     <ProjectSections content={content} locale={locale} technologies={project.technologies ?? project.tags} />
     <aside class="project-scope"><h2>{t.scope}</h2><p>{content.evidenceNote}</p></aside>
   </main>

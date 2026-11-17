@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build",
+    "build": "astro check && node scripts/check-public-images.mjs public && astro build && node scripts/check-public-images.mjs dist",
     "preview": "astro preview",
     "check": "astro check",
     "test": "node scripts/check-config.mjs",

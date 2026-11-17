@@ -129,3 +129,12 @@ Las 26 capturas generadas y `browser-results.json` están en `.verification/iter
 La prueba de teclado envía pulsaciones completas y espera el cambio nativo de estado del desplegable; no sustituye la interacción por un clic programático. Se comprobaron tanto el contenido ampliado abierto como la presentación inicial cerrada usada para las capturas.
 
 Límites: no se ejecutaron los servicios externos, tests Django/Pytest, Locust ni contenedores. No se comparan rendimientos. Siguen pendientes capturas reales de las aplicaciones, verificación de implementación de AURA, datos personales/dominio y revisión del hosting cuando se despliegue. Sin commit ni despliegue en esta iteración.
+
+
+## Evidencia visual EDC — iteración 7 (2026-11-10)
+
+Se inspeccionaron doce PNG aportados por el propietario y se publicaron seis copias revisadas: resultado y proveedores del dashboard, negociación y transferencia manual, Policy y Contract Definition de provisioning. Son evidencia visual aportada; no se ejecutó el prototipo ni se validó remotamente ningún servicio. Las fuentes de código previamente fijadas permanecen sin cambios.
+
+La ejecución mostrada en el dashboard figura como `smoke_only`: sus resultados `SUCCESS`, `READY_FOR_PICKUP` y estados `CLEARED` se conservan sin atribuir ejecución a las etapas `SKIPPED`. El flujo manual muestra negociación `FINALIZED`, transferencia `STARTED`, EDR obtenido y dato `CLEARED`; iniciar una transferencia no demuestra que su proceso esté finalizado. Las pantallas de provisioning muestran relaciones entre activos y políticas de demostración, no despliegues productivos.
+
+Las copias públicas ocultan valores operativos sensibles; no se alteraron resultados ni se generaron pantallas ficticias. La selección y las verificaciones del portfolio están documentadas en `production-readiness.md`. No se infiere rendimiento, seguridad integral ni conexión con autoridades públicas a partir de estas imágenes.

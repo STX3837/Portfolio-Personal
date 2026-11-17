@@ -1,5 +1,10 @@
 import assert from 'node:assert/strict';
 import { getSiteOrigin } from '../config/site.mjs';
+import { verifyPublicImages } from './check-public-images.mjs';
+import { validateScreenshot } from '../config/project-screenshot.mjs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 assert.equal(getSiteOrigin(undefined), undefined);
 assert.equal(getSiteOrigin('https://portfolio.invalid/'), 'https://portfolio.invalid');
@@ -13,3 +18,19 @@ assert.throws(() => getSiteOrigin(undefined, { production: true }));
 assert.throws(() => getSiteOrigin('http://portfolio.invalid', { production: true }));
 assert.equal(getSiteOrigin('https://portfolio.invalid', { production: true }), 'https://portfolio.invalid');
 console.log('PASS: production origin validation, missing domain, HTTPS and malformed URLs.');
+const directory = mkdtempSync(join(tmpdir(), 'portfolio-image-'));
+try {
+  mkdirSync(join(directory, 'images/projects'), { recursive: true });
+  // A file-existence fixture, not a fabricated project screenshot.
+  writeFileSync(join(directory, 'images/projects/fixture.png'), 'fixture');
+  const image = { src: '/images/projects/fixture.png', width: 1600, height: 900, alt: { es: 'Vista de prueba', en: 'Test view' } };
+  assert.equal(validateScreenshot(undefined, directory), undefined);
+  assert.equal(validateScreenshot(image, directory), image);
+  for (const invalid of [{ src: 'https://example.com/image.png' }, { src: '/images/projects/../image.png' },
+    { width: 0 }, { height: -1 }, { alt: { es: 'Vista' } }, { src: '/images/projects/missing.png' }]) {
+    assert.throws(() => validateScreenshot({ ...image, ...invalid }, directory));
+  }
+} finally { rmSync(directory, { recursive: true, force: true }); }
+console.log('PASS: optional screenshots, local files, dimensions, translated alt and invalid configurations.');
+await verifyPublicImages('public');
+console.log('PASS: reviewed EDC image hashes, raster metadata and private source exclusion.');

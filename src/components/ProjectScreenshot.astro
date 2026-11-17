@@ -1,0 +1,13 @@
+---
+import type { ProjectScreenshot } from '../data/projects';
+import type { Locale } from '../i18n/ui';
+import { validateScreenshot } from '../../config/project-screenshot.mjs';
+interface Props { image: ProjectScreenshot; locale: Locale; eager?: boolean; originalLink?: boolean }
+const { image, locale, eager = false, originalLink = false } = Astro.props;
+const screenshot = validateScreenshot(image)!;
+const openLabel = locale === 'es' ? 'Ver a tamaño original' : 'View original size';
+---
+<figure class:list={['project-screenshot', { 'screenshot-with-caption': originalLink, 'screenshot-portrait': screenshot.height > screenshot.width }]}>
+  <img src={screenshot.src} width={screenshot.width} height={screenshot.height} alt={screenshot.alt[locale]} loading={eager ? 'eager' : 'lazy'} decoding="async" />
+  {originalLink && <figcaption><span>{image.caption?.[locale] ?? image.alt[locale]}</span><a href={screenshot.src} target="_blank" rel="noopener noreferrer" aria-label={`${openLabel}: ${image.caption?.[locale] ?? image.alt[locale]} (${locale === 'es' ? 'nueva pestaña' : 'new tab'})`}>{openLabel} ↗</a></figcaption>}
+</figure>

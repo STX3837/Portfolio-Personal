@@ -1,9 +1,20 @@
 ---
-import type { ProjectContent } from '../data/projects';
+import type { ProjectContent, Project } from '../data/projects';
+import ProjectGallery from './ProjectGallery.astro';
 import { copy, type Locale } from '../i18n/ui';
-interface Props { content: ProjectContent; locale: Locale }
-const { content, locale } = Astro.props;
+interface Props { content: ProjectContent; locale: Locale; implementationScreenshots?: Project['implementationScreenshots'] }
+const { content, locale, implementationScreenshots } = Astro.props;
+const imagesFor = (visualId?: string) => visualId ? implementationScreenshots?.[visualId] ?? [] : [];
 const t = copy[locale];
+const diagram = locale === 'es' ? {
+ control: 'Control transaccional de concurrencia', accepted: 'Una reserva aceptada', rejected: 'Una reserva rechazada',
+ note: 'Representación conceptual: no asigna un ganador ni un orden de ejecución a los compradores.',
+ scroll: 'Desplaza la tabla horizontalmente para comparar Django y FastAPI. También puedes enfocarla y usar las flechas del teclado.',
+} : {
+ control: 'Transactional concurrency control', accepted: 'One reservation accepted', rejected: 'One reservation rejected',
+ note: 'Conceptual representation: neither a winner nor an execution order is assigned to the shoppers.',
+ scroll: 'Scroll horizontally to compare Django and FastAPI. You can also focus the table and use the arrow keys.',
+};
 ---
 {content.implementations && <section class="case-section" aria-labelledby="implementations-title">
   <p class="eyebrow">DISTANS / 01</p>
@@ -17,12 +28,22 @@ const t = copy[locale];
     </article>)}
   </div>
 </section>}
+{content.implementations && <ProjectGallery locale={locale} title={t.interfacesTitle} groups={content.implementations.map(implementation => ({ id: implementation.visualId ?? implementation.name, title: `${locale === 'es' ? 'Capturas de' : 'Screenshots of'} ${implementation.name}`, images: imagesFor(implementation.visualId) }))} />}
 {content.concurrency && <section class="case-section concurrency-case" aria-labelledby="concurrency-title">
   <p class="eyebrow">DISTANS / 02</p>
   <h2 id="concurrency-title">{content.concurrency.title}</h2><p class="case-intro">{content.concurrency.intro}</p>
   <figure class="concurrency-diagram">
     <figcaption>{t.concept}</figcaption>
-    <div class="race-flow"><span>{content.concurrency.diagram[0]}</span><span class="last-unit"><span aria-hidden="true">→ </span>{content.concurrency.diagram[1]}<span aria-hidden="true"> ←</span></span><span>{content.concurrency.diagram[2]}</span></div>
+    <div class="reservation-flow">
+      <div class="reservation-pair"><span>{content.concurrency.diagram[0]}</span><span>{content.concurrency.diagram[2]}</span></div>
+      <span class="flow-arrow" aria-hidden="true">↓</span>
+      <div class="reservation-node">{content.concurrency.diagram[1]}</div>
+      <span class="flow-arrow" aria-hidden="true">↓</span>
+      <div class="reservation-node reservation-control">{diagram.control}</div>
+      <span class="flow-arrow" aria-hidden="true">↓</span>
+      <div class="reservation-pair reservation-outcomes"><span>{diagram.accepted}</span><span>{diagram.rejected}</span></div>
+    </div>
+    <p class="diagram-note">{diagram.note}</p>
   </figure>
   <div class="strategy-grid">{content.concurrency.strategies.map(strategy => <article><h3>{strategy.name}</h3><ol>{strategy.steps.map(step => <li>{step}</li>)}</ol></article>)}</div>
   <p class="case-note">{content.concurrency.note}</p>
@@ -30,7 +51,8 @@ const t = copy[locale];
 {content.comparison && <section class="case-section" aria-labelledby="comparison-title">
   <p class="eyebrow">DISTANS / 03</p><h2 id="comparison-title">{content.comparison.title}</h2>
   <p class="case-note">{content.comparison.note}</p>
-  <div class="comparison-scroll" tabindex="0" role="region" aria-label={content.comparison.title}>
+  <p id="comparison-help" class="comparison-help">{diagram.scroll}</p>
+  <div class="comparison-scroll" tabindex="0" role="region" aria-label={content.comparison.title} aria-describedby="comparison-help">
     <table><caption class="sr-only">{content.comparison.title}</caption>
       <thead><tr><th scope="col">{t.comparisonTopic}</th><th scope="col">Django</th><th scope="col">FastAPI</th></tr></thead>
       <tbody>{content.comparison.rows.map(row => <tr><th scope="row">{row.topic}</th><td>{row.django}</td><td>{row.fastapi}</td></tr>)}</tbody>

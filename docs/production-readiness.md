@@ -114,3 +114,143 @@ El script usa un Chrome/Edge instalado. Si está en otra ruta, define `CHROME_PA
 8. Revisar en la URL real las ocho páginas, enlaces, CV si existe, favicon, sitemap, robots, canonical/hreflang y redirecciones con barra final. Esa comprobación remota sigue pendiente porque no se ha desplegado.
 
 Referencias: [Astro estático en Vercel](https://docs.astro.build/en/guides/deploy/vercel/) y [configuración de Vercel](https://vercel.com/docs/project-configuration/vercel-json).
+
+
+## Iteración 5 — refinamiento visual (2026-11-05)
+
+Git estaba limpio en `content/professional-projects`. Se conserva Astro 7.4.5, Node 22.23.4, TypeScript estricto, CSS nativo, ES/EN y salida estática sin adaptador. No hay cambios en dependencias, lockfile, datos personales, mecanismos de los proyectos ni configuración externa.
+
+Archivos de implementación: `src/styles/global.css`, `src/components/ProjectCaseStudy.astro`, `Home.astro`, `ProjectDetail.astro`, nuevo `ProjectVisual.astro`, `src/data/projects.ts` (solo tipo opcional de imagen) y nuevo `config/project-screenshot.mjs`. Se amplían `scripts/check-config.mjs`, `scripts/check-browser.mjs` y README.
+
+Cambios: etiquetas y listas móviles más legibles, referencias con más espacio interactivo, tabla con separación de columnas, primera columna fija en móvil y ayuda de scroll; diagrama textual de compradores → última unidad → control transaccional → aceptación/rechazo, sin comprador ganador ni prioridad asignados. Las estrategias verificadas Django/FastAPI y todos los datos de la tabla permanecen intactos. EDC continúa como prototipo local y AURA conserva su alcance sin confirmar.
+
+El componente de capturas comparte fallback conceptual entre las tres fichas e inicio. Valida existencia local, ruta, dimensiones positivas y alt ES/EN. No se configuró ninguna imagen: se verificó el fallback en navegador y la validación con fixtures de archivos en pruebas unitarias; no se afirma haber revisado una captura real dentro del componente. README explica cómo aportarlas.
+
+Verificaciones ejecutadas con Node 22.23.4:
+
+| Comando | Resultado |
+| --- | --- |
+| `npm test` | Correcto: origen y capturas opcionales/invalidaciones |
+| `npm run check` | 28 archivos, 0 errores, 0 advertencias, 0 hints |
+| `npm run build` | Correcto; ocho páginas en `dist`, modo static |
+| `npm run check:build` | Ocho páginas, 152 enlaces/recursos internos y anclas |
+| Build + check:build con `SITE_URL` y entorno production | Correcto: canonical, hreflang, ocho URLs del sitemap y robots con origen reservado `.invalid` |
+| Build + check:build final sin dominio de prueba | Correcto; no se deja el origen de prueba en dist |
+| `npm audit` | 0 vulnerabilidades notificadas |
+
+Las capturas de DISTANS se inspeccionaron a 375, 768 y 1440 px en claro y oscuro y se comparó la vista móvil anterior. Los artefactos están en `.verification/iteration-5/`, ignorados por Git. Una ejecución intermedia del navegador se lanzó antes de que finalizase la reconstrucción de dist y falló al acceder a localStorage en un documento de error. El script ahora comprueba HTTP del preview antes de arrancar Chrome; las pruebas deben ejecutarse después del build. Las aserciones nuevas de teclado se ajustaron para usar Tab real y admitir el ancho que ocupa la barra de desplazamiento de Windows, sin modificar los estilos de foco.
+
+Pendientes: aportar capturas auténticas y revisar su contenido/alt/proporciones tras configurarlas; lectores de pantalla, Safari/Firefox y dispositivos físicos. Los controles de contraste de texto y teclado en Chrome no constituyen una certificación de accesibilidad. No se hizo commit ni despliegue.
+
+
+Resultado final de `npm run check:browser`: **96 casos correctos** (8 páginas × 6 anchos × 2 temas), sin desbordamiento horizontal de página ni fallos de contraste de texto detectados, también con detalles abiertos. Pasan fallback conceptual, dos compradores/dos resultados, tabla ajustada en escritorio, acceso con Tab/foco visible/scroll con flechas en móvil, desplegables por Enter, enlace de salto, menú/Escape, idiomas/rutas/hash, persistencia y preferencia de tema, almacenamiento bloqueado y reduced motion. Se guardaron **28 PNG** y `browser-results.json`. La revisión visual directa cubrió los seis PNG de DISTANS en 375/768/1440 y ambos temas. Sigue pendiente la evaluación con lector de pantalla y otros motores.
+
+
+## Iteración 6 — capturas reales FastAPI (2026-11-05)
+
+Se continuó sobre los cambios sin commit de la iteración 5, conservándolos. Astro permanece en 7.4.5, sin dependencias nuevas ni cambios de configuración de despliegue, SSR o idiomas.
+
+Se copiaron únicamente los dos PNG aportados a `public/images/projects/distans-fastapi-catalogue.png` (1896 × 875, 245467 bytes) y `distans-fastapi-products.png` (1897 × 871, 139230 bytes). Se inspeccionaron visualmente: catálogo/comprador y gestión de productos/vendedor, sin correo visible. Sus hashes SHA-256 coinciden con los originales. No se recibió ni incorporó el archivo de gestión de cuentas mencionado con correo; no se intentó publicarlo ni editarlo.
+
+`src/data/projects.ts` centraliza `implementationScreenshots.fastapi` (rutas, dimensiones, alt y captions ES/EN) y relaciona las traducciones mediante `visualId`. El nuevo `ProjectScreenshot.astro` comparte validación con `ProjectVisual.astro`. `ProjectDetail.astro` pasa los datos y `ProjectCaseStudy.astro` muestra el catálogo en la tarjeta FastAPI y una secuencia de ambas imágenes a ancho completo. El mismo PNG de catálogo se reutiliza. CSS mantiene proporciones y colores de origen, sin recorte, con enlaces al original y carga diferida. Hero, inicio, EDC y AURA conservan las ilustraciones conceptuales. Django conserva la tarjeta de texto y una remisión discreta a las referencias técnicas; no utiliza capturas FastAPI como si fueran Django.
+
+Una comparación estructural con los datos de Git, excluyendo las nuevas propiedades visuales, confirmó que el contenido técnico de todos los proyectos permanece idéntico. Los scripts de build y navegador comprueban las dos rutas de imagen aprobadas, alt descriptivo, dimensiones y la ausencia de captura Django. README explica archivos, estructura, futura clave `django`, fallback y actualización de expectativas de pruebas al aportar nuevos archivos.
+
+| Comprobación ejecutada | Resultado |
+| --- | --- |
+| `npm test` | Correcto: origen y validación de capturas opcionales |
+| `npm run check` | 29 archivos; 0 errores, 0 advertencias, 0 hints |
+| `npm run build` | Correcto: ocho páginas estáticas en dist |
+| `npm run check:build` | Correcto: ocho rutas, 158 enlaces/recursos internos, metadatos, sitemap y robots sin dominio local |
+| `npm audit` | 0 vulnerabilidades notificadas |
+
+Se inspeccionaron los seis PNG de DISTANS en 375, 768 y 1440 px y ambos temas. En móvil las imágenes preservan el encuadre completo; para leer los textos de una captura de escritorio se ofrece el archivo a tamaño original. No se afirma que todo el texto incrustado en los PNG resulte legible en la miniatura móvil, ni que el contraste interno de las aplicaciones fotografiadas haya sido auditado por el comprobador de texto DOM.
+
+Pendiente aportar capturas auténticas de Django. Continúan pendientes lectores de pantalla, otros motores y dispositivos físicos. No se hizo commit ni despliegue ni se modificaron servicios externos.
+
+
+`npm run check:browser`, con preview iniciado después del build: **96 casos correctos**, ocho páginas × seis anchos (320/375/430/768/1024/1440) × dos temas. Se verificaron carga y dimensiones naturales de los PNG, proporciones renderizadas, fallback conceptual, ausencia de capturas Django, falta de desbordamiento de página, contraste de texto DOM, navegación por Tab/foco visible en los dos enlaces de galería y tabla, scroll por flechas, desplegables, menú/Escape, idiomas, rutas/hash, persistencia/preferencia de tema, almacenamiento bloqueado y reduced motion. Se guardaron 28 PNG y `browser-results.json` en `.verification/iteration-6/`, ignorado por Git. Preview se detuvo al terminar.
+
+
+## Ampliación de DISTANS — 2026-11-10 (integración parcial)
+
+Rama `content/professional-projects`, con cambios pendientes de iteraciones anteriores preservados. Se localizaron los dos PNG anteriores de FastAPI en `public/images/projects/`, ya configurados en `projects.ts`. No se encontraron los tres PNG nuevos en el workspace, carpeta del adjunto o Escritorio: las imágenes visibles del chat no ofrecen una ruta de archivo utilizable por las herramientas. Se solicitaron las rutas locales. **No están integradas las cinco capturas**: están disponibles y configuradas únicamente las dos anteriores. No se inventaron imágenes ni se publicaron archivos vacíos o referencias rotas. El panel de cuentas sigue excluido.
+
+Se añadió `DISTANS en funcionamiento / DISTANS in action` con traducción centralizada, grupos por implementación y cuadrícula de dos columnas (una hasta 800 px). Cada imagen aparece una sola vez: se retiró la vista duplicada del catálogo de la tarjeta, conservando todos los datos técnicos y enlaces de ambas tarjetas. `ProjectScreenshot` reconoce imágenes verticales mediante dimensiones y limita su ancho a 280 px; esa variante queda preparada, pero no se comprobó con el mapa real porque falta su archivo. No se tocaron el diagrama, la comparativa técnica, los otros proyectos, dependencias, Astro o Vercel. Una comparación estructural de los datos con Git confirmó contenido técnico idéntico excluyendo configuración visual.
+
+Los dos archivos existentes se reutilizan sin mover, renombrar ni recomprimir (245467 y 139230 bytes). Se actualizaron sus alt y captions a los textos exactos solicitados. `README.md` documenta rutas pendientes, datos, reuso, proporciones, fallbacks y pruebas. Los scripts conservan comprobaciones de carga, dimensiones, privacidad por lista aprobada, teclado, contraste y enlaces; adaptan la expectativa a dos imágenes sin repetición.
+
+Resultados ejecutados con Node 22.23.4: `npm test` correcto; `npm run check`, 29 archivos sin errores/advertencias/hints; `npm run build`, ocho páginas estáticas; `npm run check:build`, ocho rutas y 156 enlaces/recursos. También pasaron builds y verificación SEO con origen reservado `.invalid` y sin dominio: canonical/hreflang, metadatos, sitemap y robots. La salida final no conserva el origen de prueba. `npm audit`: cero vulnerabilidades notificadas.
+
+Pendientes para finalizar: archivos reales de catálogo Django, carrito Django y mapa móvil FastAPI, con inspección de dimensiones/peso/privacidad, incorporación a sus grupos y repetición de regresión para las cinco imágenes. La galería actual no se presenta como una selección completa de cinco. Continúan pendientes lectores de pantalla, otros motores y dispositivos físicos. Sin commit ni despliegue.
+
+
+`npm run check:browser`, con preview iniciado: 96 casos correctos para el estado actual de dos imágenes (8 páginas × 6 anchos × 2 temas), sin imágenes rotas, duplicados, desbordamiento de página ni fallos de contraste de texto DOM detectados. Pasan carga, dimensiones/proporciones, alt descriptivos, enlaces por Tab con foco visible, menú/Escape, idioma/rutas/hash, temas/persistencia, almacenamiento bloqueado, reduced motion, tabla y desplegables. Se generaron 28 PNG y `browser-results.json` en `.verification/iteration-6-expanded/`. Se inspeccionaron los seis PNG ES de DISTANS en 375/768/1440 y ambos temas. Estos resultados no incluyen las tres imágenes ausentes ni prueban la variante vertical con el mapa auténtico. Preview se detuvo al terminar.
+
+
+## Galería completa de cinco imágenes — 2026-11-10
+
+El usuario aportó los tres archivos pendientes en `public/images/projects/`. Se inspeccionaron antes de integrarlos: `django-catalogo.png` (522 × 444, 57507 bytes), `django-carrito.png` (590 × 353, 45779 bytes) y `fastapi-mapa-mobile.png` (271 × 559, 80604 bytes). Coinciden con catálogo/carrito Django y mapa móvil FastAPI. No se aprecian correos, credenciales ni información privada en las vistas. No se ha incorporado el panel de cuentas.
+
+Este estado resuelve el bloqueo de archivos del apartado anterior: **las cinco capturas auténticas están configuradas**. Se mantienen las rutas y bytes anteriores de los dos PNG FastAPI y se usan las rutas aportadas de los tres nuevos, sin moverlos, editarlos ni crear copias. Peso conjunto: 568587 bytes (unos 555 KiB); sin compresión adicional para preservar el texto. Las dimensiones explícitas y la carga diferida se mantienen.
+
+La sección de interfaces tiene dos grupos: Django, catálogo y carrito; FastAPI, catálogo, gestión y mapa. Cada imagen aparece una sola vez y conserva proporciones, alt y caption ES/EN solicitados. El mapa usa la variante vertical limitada a 280 px. La cuadrícula sigue siendo de dos columnas en escritorio y una hasta 800 px. Los enlaces permiten abrir originales. Se conservan hero conceptual, las dos tarjetas completas, diagrama, comparativa, EDC y AURA. La comparación estructural de datos confirma que solo se modificó configuración visual.
+
+Archivos modificados en esta continuación: `src/data/projects.ts`, `scripts/check-build.mjs`, `scripts/check-browser.mjs`, README y este informe. Los tres PNG fueron aportados por el usuario; se usan desde `public/images/projects/`. Los componentes existentes ya admitían grupos múltiples y orientación vertical, así que no se duplicó lógica.
+
+Resultados: `npm test` correcto; `npm run check`, 29 archivos sin errores/advertencias/hints; `npm run build`, ocho páginas estáticas; `npm run check:build`, 162 enlaces/recursos y ocho rutas. Se verificó además SEO con origen reservado de prueba y sin dominio: canonical/hreflang, sitemap, robots y metadatos correctos. El build final no incluye el origen de prueba. `npm audit`: cero vulnerabilidades notificadas. Astro permanece en 7.4.5, sin dependencias nuevas ni cambios en Vercel. Sin commit ni despliegue.
+
+
+Verificación final de las cinco capturas: `npm run check:browser` pasa **96 casos** (8 páginas × 6 anchos × 2 temas). Comprueba cinco imágenes únicas, asignación exacta de los grupos Django/FastAPI, carga y dimensiones naturales desde dist, proporciones, ancho acotado del mapa, alt descriptivos, foco visible y navegación por Tab en los cinco enlaces, temas/idiomas, menú, tabla, desplegables y reduced motion. Sin imágenes rotas, desbordamientos de página ni fallos de contraste DOM detectados. Se generaron 28 PNG y `browser-results.json` en `.verification/iteration-6-complete/`; se revisaron los seis PNG ES de DISTANS a 375/768/1440 px en ambos temas. No falta ninguna de las cinco imágenes. Pendientes generales: lectores de pantalla, otros motores y dispositivos físicos; el contraste del texto incrustado en los PNG no se certifica con las pruebas DOM. Sin commit ni despliegue.
+
+
+## Iteración 7 — Puerto Dataspace EDC (2026-11-10)
+
+**Se incorporaron las seis capturas previstas**, dos por página, tras inspeccionar los doce originales. Rama `content/professional-projects`, con todos los cambios anteriores preservados. La ubicación real era `public/images/projects/puerto-dataspace/`; `public/puerto-dataspace/` no existía. Ningún original estaba bajo seguimiento Git. No fue necesario modificar el índice.
+
+Inventario completo: todos los archivos son PNG; ninguno repite hash exacto, aunque varios solapan contenido.
+
+| Página | Original | Dimensiones | Bytes | Selección / motivo |
+| --- | --- | --- | --- | --- |
+| dashboard | Captura de pantalla 2026-11-10 205558.png | 1917 × 865 | 112081 | Seleccionada → `dashboard/resultado.png` |
+| dashboard | Captura de pantalla 2026-11-10 210144.png | 1917 × 860 | 121746 | Descartada: EDR con fragmentos de token y URLs; solapa el resultado de proveedores. |
+| dashboard | Captura de pantalla 2026-11-10 211219.png | 1917 × 863 | 187174 | Descartada: logs/flujo global, menor valor visual y solapamiento. |
+| dashboard | Captura de pantalla 2026-11-10 211241.png | 1917 × 846 | 173571 | Seleccionada → `dashboard/providers.png` |
+| dashboard | Captura de pantalla 2026-11-10 211305.png | 1906 × 851 | 165270 | Descartada: timeline extenso, principalmente etapas SKIPPED. |
+| manual-flow | Captura de pantalla 2026-11-10 211918.png | 1917 × 868 | 120193 | Descartada: selección/catálogo, solapamiento con la negociación y direcciones internas. |
+| manual-flow | Captura de pantalla 2026-11-10 211955.png | 1917 × 861 | 131395 | Seleccionada → `manual-flow/negociacion.png` |
+| manual-flow | Captura de pantalla 2026-11-10 212036.png | 1917 × 868 | 85673 | Seleccionada → `manual-flow/transferencia.png` |
+| provisioning | Captura de pantalla 2026-11-10 212513.png | 1917 × 867 | 89138 | Descartada: Asset y backend interno; se priorizan Policy y Contract. |
+| provisioning | Captura de pantalla 2026-11-10 212552.png | 1917 × 870 | 94145 | Seleccionada → `provisioning/policy.png` |
+| provisioning | Captura de pantalla 2026-11-10 212638.png | 1917 × 873 | 107212 | Seleccionada → `provisioning/contract.png` |
+| provisioning | Captura de pantalla 2026-11-10 212717.png | 1917 × 868 | 128857 | Descartada: resumen redundante con claves y endpoints internos. |
+
+Los doce originales se copiaron a `.verification/iteration-7/originals/`, se verificaron SHA-256 y después se retiró la carpeta pública mediante un traslado a `.verification/iteration-7/source-originals/`. Se verificó nuevamente que ambas copias privadas contienen los doce archivos idénticos byte a byte. Ambas rutas están excluidas de Git y no forman parte de dist. No se eliminó permanentemente ningún original.
+
+Riesgos observados: claves API visibles, fragmentos bearer/EDR, URLs internas y valores de oferta, negociación, acuerdo, ejecución y transferencia. Los identificadores de activos, políticas y contenedores del escenario simulado se conservan para explicar sus relaciones; no se tratan como credenciales. No se infiere vigencia real de ninguna clave/token. Si alguno se utiliza en servicios accesibles, su propietario debe revocarlo o rotarlo: esta tarea no modifica servicios y el saneamiento no invalida credenciales.
+
+Saneamiento: trece rectángulos opacos en cinco capturas; la captura de estados por proveedor no contenía los valores sensibles observados y se reencodificó sin cambiar píxeles. Se utilizó sharp ya instalado por Astro, sin dependencias nuevas, para reemplazar exactamente los píxeles y reencodificar PNG sin metadatos ni capas. Verificación exhaustiva de todos los píxeles: cada región cubierta contiene únicamente el color opaco y cada píxel exterior coincide con el original. Las seis salidas se revisaron visualmente. El procedimiento local reproducible y sus coordenadas están en `.verification/iteration-7/sanitize.mjs`, junto al respaldo, ignorado por Git. No se utilizaron desenfoques ni generación de contenido.
+
+Copias públicas en `public/images/projects/puerto-dataspace-edc/`, agrupadas en dashboard, manual-flow y provisioning. El total es 569681 bytes, aproximadamente 556 KiB. Se conservaron dimensiones y estados SUCCESS/CLEARED/FINALIZED/STARTED/SKIPPED; no se simularon resultados. Se aclaró que el dashboard corresponde a smoke test y que STARTED no equivale a proceso finalizado. No se ejecutó el prototipo ni se presentaron integraciones con autoridades reales.
+
+La galería se comparte con DISTANS a través de `ProjectGallery.astro`, que reutiliza `ProjectScreenshot.astro`. EDC usa imágenes anchas, texto y acceso al raster público a tamaño original; el texto incrustado en las miniaturas móviles requiere abrir ese enlace. `projects.ts` centraliza grupos, descripciones, notas, alt y captions ES/EN. DISTANS mantiene sus cinco PNG y comparativa; AURA mantiene el concepto. Se conservan las interfaces anteriores de datos, con una propiedad gallery opcional. No se modificaron dependencias ni Vercel.
+
+Archivos: nuevo `ProjectGallery.astro`, ajustes en `ProjectCaseStudy.astro`, `ProjectDetail.astro`, `projects.ts` y CSS; seis PNG revisados; nuevo `config/edc-public-images.json` y `scripts/check-public-images.mjs`; ampliaciones de scripts de configuración/build/navegador; script build de package.json; README y documentación. El lockfile y las versiones permanecen sin cambios. `docs/project-evidence.md` añade únicamente la procedencia y límites de esta evidencia visual.
+
+Comprobación de privacidad incorporada antes y después del build: hashes SHA-256 de seis archivos revisados, dimensiones, estructura PNG sin metadatos, ausencia de los hashes de los doce originales aunque se renombren, rutas privadas y rutas originales. Pruebas negativas locales: un original renombrado se rechaza; un raster revisado alterado también. Esto verifica los archivos conocidos, no detecta automáticamente secretos en cualquier nueva imagen: toda incorporación requiere inspección y nueva revisión del manifiesto.
+
+Resultados reales con Node 22.23.4 y Astro 7.4.5:
+
+| Comprobación | Resultado |
+| --- | --- |
+| `npm test` | Correcto: dominio, configuración opcional de imágenes y exclusión de originales |
+| `npm run check` | 31 archivos, 0 errores, 0 advertencias y 0 hints |
+| `npm run build` | Ocho páginas estáticas; controles de privacidad public/dist correctos |
+| `npm run check:build` | Ocho rutas ES/EN, 174 enlaces/recursos y anclas, seis EDC y cinco DISTANS |
+| SEO con origen reservado de prueba | Canonical, hreflang, sitemap, robots y metadatos correctos; salida final restaurada sin dominio de prueba |
+| `npm audit` | 0 vulnerabilidades notificadas |
+| `npm run check:browser` con preview en 4347 | 96 casos correctos, ocho páginas × seis anchos × dos temas |
+
+Chrome comprobó carga desde dist, seis imágenes EDC únicas y sus tres grupos, dimensiones/proporciones, alt, ausencia de imágenes rotas, contraste DOM, ausencia de desbordamiento de página, Tab/foco visible en seis enlaces EDC y cinco DISTANS, menú/Escape, idioma/rutas/hash, temas/persistencia, almacenamiento bloqueado, reduced motion, tabla y desplegables. Las rutas originales y una ruta de respaldo respondieron HTTP 404. Los hashes de los doce originales están ausentes de todos los archivos de public y dist. Los metadatos PNG publicados no contienen la fuente original ni datos reversibles.
+
+Se generaron 40 PNG y browser-results.json en `.verification/iteration-7/browser/`. Se revisaron visualmente los seis PNG ES de EDC en 375, 768 y 1440 px, ambos temas, además de las seis copias públicas saneadas. Estos controles no certifican accesibilidad ni el contraste del texto dentro de los raster. Pendientes: lectores de pantalla, otros motores/dispositivos, comprobar o rotar valores expuestos si siguen vigentes y revisión del hosting cuando se publique. Preview se detuvo al terminar. Sin commit, despliegue ni modificaciones externas.

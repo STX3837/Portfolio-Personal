@@ -2,8 +2,11 @@ import assert from 'node:assert/strict';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { resolve, relative, sep } from 'node:path';
 import { getSiteOrigin } from '../config/site.mjs';
+import { verifyPublicImages, edcManifest } from './check-public-images.mjs';
 
 const root = resolve('dist');
+await verifyPublicImages('public');
+await verifyPublicImages(root);
 const origin = getSiteOrigin(process.env.SITE_URL);
 async function walk(dir) {
   const entries = await readdir(dir, { withFileTypes: true });
@@ -41,6 +44,25 @@ for (const [route, { html, ids }] of pages) {
     check(html.includes('id="concurrency-title"'), 'visible concurrency case');
     check(html.includes('id="comparison-title"'), 'comparison table');
     check(html.includes('class="technical-section technical-references"'), 'secondary technical references');
+    const screenshots = [...html.matchAll(/<img\b[^>]*>/g)].map(m => m[0]);
+    check(screenshots.length === 5, 'five approved screenshots');
+    check(new Set(screenshots.map(image => attr(image, 'src'))).size === screenshots.length, 'no duplicate screenshots');
+    check(html.includes('id="interfaces-title"'), 'DISTANS interface section');
+    for (const image of screenshots) {
+      check(['/images/projects/django-catalogo.png', '/images/projects/django-carrito.png', '/images/projects/distans-fastapi-catalogue.png', '/images/projects/distans-fastapi-products.png', '/images/projects/fastapi-mapa-mobile.png'].includes(attr(image, 'src')), 'only approved screenshots');
+      check(attr(image, 'alt')?.length > 40, 'descriptive screenshot alt');
+      check(Number(attr(image, 'width')) > 0 && Number(attr(image, 'height')) > 0, 'screenshot dimensions');
+    }
+  }
+  if (route.endsWith('/projects/puerto-dataspace-edc/')) {
+    const images = [...html.matchAll(/<img\b[^>]*>/g)].map(match => match[0]);
+    check(images.length === 6, 'six EDC images');
+    check(new Set(images.map(image => attr(image, 'src'))).size === 6, 'unique EDC images');
+    for (const image of images) {
+      check(edcManifest.images.some(approved => approved.src === attr(image, 'src')), 'reviewed EDC image only');
+      check(attr(image, 'alt')?.length > 40, 'EDC descriptive alt');
+    }
+    check(html.includes('smoke test') && html.includes('SKIPPED') && html.includes('STARTED'), 'execution limitations retained');
   }
   check(html.includes(`<html lang="${route.startsWith('/en/') ? 'en' : 'es'}"`), 'language');
   check((html.match(/<h1\b/g) || []).length === 1, 'one h1');

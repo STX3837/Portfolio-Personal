@@ -6,6 +6,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const base = process.env.PREVIEW_URL || 'http://127.0.0.1:4321';
+const previewResponse = await fetch(base);
+assert.ok(previewResponse.ok, `Preview is not ready: ${base} returned HTTP ${previewResponse.status}. Finish the build before starting preview.`);
 const executable = process.env.CHROME_PATH || [
   'C:/Program Files/Google/Chrome/Application/chrome.exe',
   'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
@@ -55,17 +57,50 @@ try {
   }
   const results = [];
   const paths = ['/', '/en/', ...['distans', 'puerto-dataspace-edc', 'aura'].flatMap(slug => [`/projects/${slug}/`, `/en/projects/${slug}/`])];
-  for (const width of [320, 375, 768, 1024, 1440]) {
+  for (const width of [320, 375, 430, 768, 1024, 1440]) {
     await send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: false });
     for (const theme of ['light', 'dark']) {
       await navigate('/'); await evaluate(`localStorage.setItem('theme', '${theme}')`);
       for (const path of paths) {
         await navigate(path);
+        await evaluate("Promise.all([...document.images].map(image => { image.loading = 'eager'; return image.decode(); }))");
+        assert.equal(await evaluate("document.querySelectorAll('.project-art').length"), path.includes('/projects/') ? 1 : 3, 'Conceptual fallback without configured screenshots');
         if (path.endsWith('/projects/distans/')) {
+          const screenshots = await evaluate(`Array.from(document.querySelectorAll('.screenshot-with-caption img'), image => ({
+            src: image.getAttribute('src'), alt: image.alt, width: image.naturalWidth, height: image.naturalHeight,
+            declaredWidth: Number(image.getAttribute('width')), declaredHeight: Number(image.getAttribute('height')),
+            ratio: image.clientWidth / image.clientHeight,
+          }))`);
+          assert.equal(screenshots.length, 5, 'Five screenshots, each displayed once');
+          assert.equal(new Set(screenshots.map(image => image.src)).size, screenshots.length, 'No duplicate screenshots');
+          assert.deepEqual([...new Set(screenshots.map(image => image.src))].sort(), ['/images/projects/distans-fastapi-catalogue.png', '/images/projects/distans-fastapi-products.png', '/images/projects/django-carrito.png', '/images/projects/django-catalogo.png', '/images/projects/fastapi-mapa-mobile.png']);
+          for (const image of screenshots) {
+            assert.ok(image.alt.length > 40, 'Descriptive image alt');
+            assert.equal(image.width, image.declaredWidth); assert.equal(image.height, image.declaredHeight);
+            assert.ok(Math.abs(image.ratio - image.width / image.height) < .03, 'Screenshot proportions');
+          }
+          const groups = await evaluate("Array.from(document.querySelectorAll('.implementation-gallery'), group => ({ implementation: group.dataset.implementation, files: Array.from(group.querySelectorAll('img'), image => image.getAttribute('src').split('/').pop()) }))");
+          assert.deepEqual(groups, [
+            { implementation: 'django', files: ['django-catalogo.png', 'django-carrito.png'] },
+            { implementation: 'fastapi', files: ['distans-fastapi-catalogue.png', 'distans-fastapi-products.png', 'fastapi-mapa-mobile.png'] },
+          ], 'Screenshots associated with the correct implementation');
+          assert.ok(await evaluate("document.querySelector('.screenshot-portrait img').clientWidth <= 280"), 'Mobile map width is bounded');
           assert.equal(await evaluate("document.querySelector('.concurrency-case').closest('details') === null"), true);
           assert.equal(await evaluate("document.querySelector('.technical-references').open"), false);
           assert.ok(await evaluate("document.querySelectorAll('.hero-tags li').length <= 6"));
+          assert.equal(await evaluate("document.querySelectorAll('.reservation-outcomes span').length"), 2);
+          assert.equal(await evaluate("document.querySelectorAll('.reservation-pair:first-child span').length"), 2);
           if (width >= 768) assert.equal(await evaluate("document.querySelector('.comparison-scroll').scrollWidth <= document.querySelector('.comparison-scroll').clientWidth"), true, 'Desktop comparison must fit');
+        }
+        if (path.endsWith('/projects/puerto-dataspace-edc/')) {
+          const images = await evaluate("Array.from(document.querySelectorAll('.interface-gallery img'), image => ({src:image.getAttribute('src'), alt:image.alt, width:image.naturalWidth, height:image.naturalHeight, declaredWidth:Number(image.getAttribute('width')), declaredHeight:Number(image.getAttribute('height')), ratio:image.clientWidth/image.clientHeight}))");
+          assert.equal(images.length, 6); assert.equal(new Set(images.map(image => image.src)).size, 6);
+          for (const image of images) {
+            assert.ok(image.src.startsWith('/images/projects/puerto-dataspace-edc/'));
+            assert.ok(image.alt.length > 40); assert.equal(image.width,image.declaredWidth); assert.equal(image.height,image.declaredHeight);
+            assert.ok(Math.abs(image.ratio-image.width/image.height)<.03, 'EDC screenshot proportions');
+          }
+          assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('.implementation-gallery'), group => ({id:group.dataset.implementation,count:group.querySelectorAll('img').length}))"), [{id:'dashboard',count:2},{id:'manual-flow',count:2},{id:'provisioning',count:2}]);
         }
         // Technical content must also fit when readers open the native disclosures.
         if (path.includes('/projects/')) await evaluate("document.querySelectorAll('.technical-section').forEach(section => section.open = true)");
@@ -100,13 +135,13 @@ try {
         assert.equal(result.theme, theme); assert.equal(result.lang, path.startsWith('/en/') ? 'en' : 'es');
         assert.deepEqual(result.contrastFailures, [], `Text contrast: ${path}, ${width}, ${theme}`);
         assert.equal(result.mobile, width <= 620); assert.equal(result.desktop, width > 620);
-        if (path === '/' || ((width === 320 || width === 1440) && path === '/en/') || ([375,768,1440].includes(width) && path.endsWith('/projects/distans/'))) {
+        if (path === '/' || ((width === 320 || width === 1440) && path === '/en/') || ([375,768,1440].includes(width) && (path.endsWith('/projects/distans/') || path.endsWith('/projects/puerto-dataspace-edc/')))) {
           // Capture the default reading experience; expanded disclosures were checked above.
           await evaluate("document.querySelectorAll('.technical-section').forEach(section => section.open = false)");
           const metrics = await send('Page.getLayoutMetrics');
           const screenshot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true,
             clip: { x: 0, y: 0, width, height: metrics.cssContentSize.height, scale: 1 } });
-          const name = `${path.startsWith('/en/') ? 'en' : 'es'}${path.endsWith('/projects/distans/') ? '-distans' : ''}-${width}-${theme}.png`;
+          const name = `${path.startsWith('/en/') ? 'en' : 'es'}${path.includes('/projects/') ? '-' + path.split('/projects/')[1].split('/')[0] : ''}-${width}-${theme}.png`;
           await writeFile(resolve(output, name), Buffer.from(screenshot.data, 'base64'));
         }
       }
@@ -123,6 +158,23 @@ try {
   await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
   assert.equal(await evaluate("document.activeElement.classList.contains('skip-link')"), true, 'Keyboard skip link');
   await navigate('/projects/distans/');
+  await evaluate("document.querySelector('.implementation-card:last-child .project-link').focus()");
+  for (const file of ['django-catalogo.png', 'django-carrito.png', 'distans-fastapi-catalogue.png', 'distans-fastapi-products.png', 'fastapi-mapa-mobile.png']) {
+    await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+    await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+    assert.equal(await evaluate("document.activeElement.closest('.implementation-gallery') !== null"), true, 'Keyboard reaches screenshot original');
+    assert.equal(await evaluate(`document.activeElement.getAttribute('href') === '/images/projects/${file}'`), true);
+    assert.equal(await evaluate("getComputedStyle(document.activeElement).outlineStyle !== 'none'"), true, 'Visible screenshot link focus');
+  }
+  await evaluate("[...document.querySelectorAll('.implementation-gallery a')].at(-1).focus()");
+  await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+  await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+  assert.equal(await evaluate("document.activeElement.classList.contains('comparison-scroll')"), true, 'Keyboard reaches comparison');
+  assert.equal(await evaluate("getComputedStyle(document.activeElement).outlineStyle !== 'none'"), true, 'Visible table focus');
+  await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'ArrowRight', code: 'ArrowRight', windowsVirtualKeyCode: 39 });
+  await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'ArrowRight', code: 'ArrowRight', windowsVirtualKeyCode: 39 });
+  await until(() => evaluate("document.querySelector('.comparison-scroll').scrollLeft > 0"));
+  assert.equal(await evaluate("document.documentElement.scrollWidth <= innerWidth"), true, 'Table scroll stays inside its region');
   await evaluate("document.querySelector('.technical-references summary').focus()");
   const pressEnter = async () => {
     await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' });
@@ -132,6 +184,15 @@ try {
   await until(() => evaluate("document.querySelector('.technical-references').open"));
   await pressEnter();
   await until(() => evaluate("!document.querySelector('.technical-references').open"));
+  await navigate('/projects/puerto-dataspace-edc/');
+  await evaluate("document.querySelector('.detail-heading .actions a:last-child').focus()");
+  for (let index=0;index<6;index++) {
+    await send('Input.dispatchKeyEvent', {type:'keyDown',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
+    await send('Input.dispatchKeyEvent', {type:'keyUp',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
+    assert.equal(await evaluate(`document.activeElement === document.querySelectorAll('.interface-gallery a')[${index}]`),true,'Keyboard reaches each sanitized EDC original');
+    assert.equal(await evaluate("getComputedStyle(document.activeElement).outlineStyle !== 'none'"),true,'EDC visible focus');
+  }
+  for (const route of ['/images/projects/puerto-dataspace/dashboard/Captura%20de%20pantalla%202026-11-10%20205558.png','/puerto-dataspace/dashboard/resultado.png','/.verification/iteration-7/originals/dashboard/Captura%20de%20pantalla%202026-11-10%20205558.png']) assert.equal((await fetch(base+route)).status,404,'Private originals must not be served');
   await navigate('/'); await click('.mobile-menu summary'); assert.equal(await evaluate("document.querySelector('.mobile-menu').open"), true);
   assert.equal(await evaluate("document.querySelector('.mobile-menu [aria-current]').dataset.section"), 'home');
   await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });

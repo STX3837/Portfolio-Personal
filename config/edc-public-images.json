@@ -1,0 +1,54 @@
+{
+  "images": [
+    {
+      "src": "/images/projects/puerto-dataspace-edc/dashboard/resultado.png",
+      "width": 1917,
+      "height": 865,
+      "sha256": "5ac02d30b45ca7af82c6624dbc1a00bc56573ab291e04fff5f4f9a9dbfe2bf45"
+    },
+    {
+      "src": "/images/projects/puerto-dataspace-edc/dashboard/providers.png",
+      "width": 1917,
+      "height": 846,
+      "sha256": "77982283923468190d529dd133dfd4c6b257c6c8408c5d3019c0cbc0ff1f8790"
+    },
+    {
+      "src": "/images/projects/puerto-dataspace-edc/manual-flow/negociacion.png",
+      "width": 1917,
+      "height": 861,
+      "sha256": "31a1c8e0e1e9a83190078b8a44d69f414d9023b4a290fed8a6cca05cc04acba5"
+    },
+    {
+      "src": "/images/projects/puerto-dataspace-edc/manual-flow/transferencia.png",
+      "width": 1917,
+      "height": 868,
+      "sha256": "fb49f158c7710850dde984d80279121b1ad8b7d10627205283d564ec2afb9486"
+    },
+    {
+      "src": "/images/projects/puerto-dataspace-edc/provisioning/policy.png",
+      "width": 1917,
+      "height": 870,
+      "sha256": "6a474b3889314dcd5c5d6b753272edbc78d187a31d590b0d53074e40d3174475"
+    },
+    {
+      "src": "/images/projects/puerto-dataspace-edc/provisioning/contract.png",
+      "width": 1917,
+      "height": 873,
+      "sha256": "9e59777e2fba0196b4cd77fb6a8ebd7957ac449a5184abdd4575a3b418758cbb"
+    }
+  ],
+  "originalHashes": [
+    "6bd979baf9dd1545ac7354c8d310185887d508eb62578b2131f56ac5f6cf6f27",
+    "ec2c86803e10b762e37de6474fa806a155a3846eddaee91fa50c4047f47a8708",
+    "395e63723a0003100a2c09956305835ce46ab8b6af00ca983fde83879388cb14",
+    "a84efca1cb2275e261102a9c68e6f0e5002580ee91ca021de1587027d75e77d6",
+    "10319e64febb06236fdb902929a81ce229e2b58eb17f73eaf421977b7ef31a68",
+    "1737a5a063a2bd8fb4fa70c0b2f1cf2e6db066999dece82f15abd5f9c68dbdbd",
+    "1f9121701d14a9bbe329b0e591c8a509b16bad506788653a89cc06d4fd276db2",
+    "1ebc13c58f36bc05f5ad8cc30fbb9fac552ee38d154b57ee57679643453559ed",
+    "a5bc17acb20fc617f535b39cd42b0887cb43d82fb7f5e5c41edb3425ef6eb870",
+    "671e4f893e0aacbdc8b682d97d52176da4247350d51eddd45e3abd7cb5043a2c",
+    "5796ad9c4b8d58639e0b49f69b73f6e1908f9b4e316a156602360a3600258056",
+    "b0492bfe710fa5d8cb18d6cfe679c0d2a267f374f7d880aeb67b5d1bc7932449"
+  ]
+}

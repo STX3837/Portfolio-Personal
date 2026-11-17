@@ -1,0 +1,19 @@
+---
+import ProjectScreenshot from './ProjectScreenshot.astro';
+import type { ProjectScreenshot as Screenshot } from '../data/projects';
+import type { Locale } from '../i18n/ui';
+interface Props {
+  locale: Locale; title: string; wide?: boolean;
+  groups: { id: string; title: string; description?: string; note?: string; images: Screenshot[] }[];
+}
+const { locale, title, groups, wide = false } = Astro.props;
+---
+{groups.some(group => group.images.length) && <section class:list={['case-section', 'interface-gallery', { 'gallery-readable': wide }]} aria-labelledby="interfaces-title">
+  <h2 id="interfaces-title">{title}</h2>
+  {groups.filter(group => group.images.length).map(group => <section class="implementation-gallery" data-implementation={group.id} aria-labelledby={`screenshots-${group.id}`}>
+    <h3 id={`screenshots-${group.id}`}>{group.title}</h3>
+    {group.description && <p>{group.description}</p>}
+    {group.note && <p class="case-note">{group.note}</p>}
+    <div class="interface-grid">{group.images.map(image => <ProjectScreenshot image={image} locale={locale} originalLink />)}</div>
+  </section>)}
+</section>}

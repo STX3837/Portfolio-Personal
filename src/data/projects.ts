@@ -1,8 +1,10 @@
 import type { Locale } from '../i18n/ui';
 export interface EvidenceLink { label: string; href: string }
+export interface ProjectScreenshot { src: string; width: number; height: number; alt: Record<Locale, string>; caption?: Record<Locale, string> }
 export interface ProjectSection { title: string; paragraphs: string[]; items: string[]; sources: EvidenceLink[] }
 export interface ProjectComparison { title: string; note: string; rows: { topic: string; django: string; fastapi: string }[] }
 export interface ProjectImplementation {
+ visualId?: string;
  name: string; repository: string; architecture: string; persistence: string; frontend: string; highlights: string[];
 }
 export interface ConcurrencyCase {
@@ -17,6 +19,9 @@ export interface ProjectContent {
  concurrency?: ConcurrencyCase; testing?: string; conclusion?: string; references?: EvidenceLink[];
 }
 export interface Project {
+ gallery?: { title: Record<Locale, string>; groups: { id: string; title: Record<Locale, string>; description: Record<Locale, string>; note?: Record<Locale, string>; images: ProjectScreenshot[] }[] };
+ screenshot?: ProjectScreenshot;
+ implementationScreenshots?: Record<string, ProjectScreenshot[]>;
  slug: string; tags: string[]; repositories?: EvidenceLink[]; technologies?: string[]; repository?: string; website?: string;
  content: Record<Locale, ProjectContent>;
 }
@@ -134,7 +139,8 @@ export const projects: Project[] = [
             "highlights": [
               "Formularios Django y autenticación integrada.",
               "Bloqueo de productos antes de reservar stock."
-            ]
+            ],
+            "visualId": "django"
           },
           {
             "name": "FastAPI",
@@ -145,7 +151,8 @@ export const projects: Project[] = [
             "highlights": [
               "Validación con Pydantic 2 y sesiones firmadas.",
               "Reserva mediante actualización condicional."
-            ]
+            ],
+            "visualId": "fastapi"
           }
         ],
         "concurrency": {
@@ -353,7 +360,8 @@ export const projects: Project[] = [
             "highlights": [
               "Django forms and built-in authentication.",
               "Product row locks before stock reservation."
-            ]
+            ],
+            "visualId": "django"
           },
           {
             "name": "FastAPI",
@@ -364,7 +372,8 @@ export const projects: Project[] = [
             "highlights": [
               "Pydantic 2 validation and signed sessions.",
               "Reservation through conditional updates."
-            ]
+            ],
+            "visualId": "fastapi"
           }
         ],
         "concurrency": {
@@ -494,7 +503,78 @@ export const projects: Project[] = [
         "label": "FastAPI",
         "href": "https://github.com/STX3837/Distans-FastAPI"
       }
-    ]
+    ],
+    "implementationScreenshots": {
+      "fastapi": [
+        {
+          "src": "/images/projects/distans-fastapi-catalogue.png",
+          "width": 1896,
+          "height": 875,
+          "alt": {
+            "es": "Catálogo principal de DISTANS FastAPI con buscador, filtros y productos de comercios locales.",
+            "en": "DISTANS FastAPI main catalog with search, filters, and products from local stores."
+          },
+          "caption": {
+            "es": "Catálogo y experiencia de compra — FastAPI",
+            "en": "Catalog and shopping experience — FastAPI"
+          }
+        },
+        {
+          "src": "/images/projects/distans-fastapi-products.png",
+          "width": 1897,
+          "height": 871,
+          "alt": {
+            "es": "Panel de gestión de productos de DISTANS FastAPI con precios, stock y herramientas para vendedores.",
+            "en": "DISTANS FastAPI product management interface showing prices, stock, and seller tools."
+          },
+          "caption": {
+            "es": "Gestión de productos para vendedores — FastAPI",
+            "en": "Product management for sellers — FastAPI"
+          }
+        },
+        {
+          "src": "/images/projects/fastapi-mapa-mobile.png",
+          "width": 271,
+          "height": 559,
+          "alt": {
+            "es": "Vista móvil de DISTANS FastAPI con mapa y marcadores de comercios cercanos.",
+            "en": "DISTANS FastAPI mobile map showing nearby stores with location markers."
+          },
+          "caption": {
+            "es": "Mapa de comercios en móvil — FastAPI",
+            "en": "Mobile store map — FastAPI"
+          }
+        }
+      ],
+      "django": [
+        {
+          "src": "/images/projects/django-catalogo.png",
+          "width": 522,
+          "height": 444,
+          "alt": {
+            "es": "Catálogo de DISTANS Django con filtros de productos, precios y disponibilidad.",
+            "en": "DISTANS Django product catalog showing product filters, prices, and availability."
+          },
+          "caption": {
+            "es": "Catálogo de productos — Django",
+            "en": "Product catalog — Django"
+          }
+        },
+        {
+          "src": "/images/projects/django-carrito.png",
+          "width": 590,
+          "height": 353,
+          "alt": {
+            "es": "Carrito de DISTANS Django con productos, cantidades y opciones de actualización.",
+            "en": "DISTANS Django shopping cart showing products, quantities, and update actions."
+          },
+          "caption": {
+            "es": "Carrito de compra — Django",
+            "en": "Shopping cart — Django"
+          }
+        }
+      ]
+    }
   },
   {
     "slug": "puerto-dataspace-edc",
@@ -889,6 +969,143 @@ export const projects: Project[] = [
           }
         ]
       }
+    },
+    "gallery": {
+      "title": {
+        "es": "El demostrador en funcionamiento",
+        "en": "The prototype in action"
+      },
+      "groups": [
+        {
+          "id": "dashboard",
+          "title": {
+            "es": "Ejecución y resultados",
+            "en": "Execution and results"
+          },
+          "description": {
+            "es": "El dashboard permite ejecutar y supervisar el flujo de intercambio de datos, consultar el estado de los proveedores y visualizar el resultado agregado.",
+            "en": "The dashboard supports running and monitoring the data exchange workflow, checking provider states, and viewing the aggregated result."
+          },
+          "note": {
+            "es": "Prototipo local con datos simulados. Estas capturas corresponden a un smoke test: no prueban la ejecución completa ni las etapas marcadas como SKIPPED.",
+            "en": "Local prototype using simulated data. These screenshots show a smoke test: they do not prove a complete run or the execution of steps marked SKIPPED."
+          },
+          "images": [
+            {
+              "src": "/images/projects/puerto-dataspace-edc/dashboard/resultado.png",
+              "width": 1917,
+              "height": 865,
+              "alt": {
+                "es": "Dashboard de Puerto Dataspace EDC con smoke test correcto y resultado agregado READY_FOR_PICKUP.",
+                "en": "Puerto Dataspace EDC dashboard showing a successful smoke test and the aggregated READY_FOR_PICKUP result."
+              },
+              "caption": {
+                "es": "Resultado agregado del intercambio (smoke test)",
+                "en": "Aggregated exchange result (smoke test)"
+              }
+            },
+            {
+              "src": "/images/projects/puerto-dataspace-edc/dashboard/providers.png",
+              "width": 1917,
+              "height": 846,
+              "alt": {
+                "es": "Estado de Customs, Health y CivilGuard durante las fases de catálogo, negociación, transferencia y descarga.",
+                "en": "Status of Customs, Health, and CivilGuard across catalog, negotiation, transfer, and download steps."
+              },
+              "caption": {
+                "es": "Estado de los tres proveedores",
+                "en": "Status of the three providers"
+              }
+            }
+          ]
+        },
+        {
+          "id": "manual-flow",
+          "title": {
+            "es": "Negociación y transferencia",
+            "en": "Negotiation and transfer"
+          },
+          "description": {
+            "es": "El flujo manual permite consultar ofertas, negociar contratos e iniciar transferencias para obtener datos autorizados.",
+            "en": "The manual workflow allows users to retrieve offers, negotiate contracts, and initiate transfers to obtain authorized data."
+          },
+          "note": {
+            "es": "FINALIZED corresponde a la negociación. STARTED indica transferencia iniciada, no finalizada; la captura muestra además EDR obtenido y dato CLEARED. Los valores operativos se han ocultado.",
+            "en": "FINALIZED refers to negotiation. STARTED means the transfer has started, not completed; the screenshot also shows a retrieved EDR and CLEARED data. Operational values have been redacted."
+          },
+          "images": [
+            {
+              "src": "/images/projects/puerto-dataspace-edc/manual-flow/negociacion.png",
+              "width": 1917,
+              "height": 861,
+              "alt": {
+                "es": "Flujo manual de EDC con oferta seleccionada y negociación contractual finalizada.",
+                "en": "EDC manual workflow showing a selected offer and finalized contract negotiation."
+              },
+              "caption": {
+                "es": "Negociación de contratos",
+                "en": "Contract negotiation"
+              }
+            },
+            {
+              "src": "/images/projects/puerto-dataspace-edc/manual-flow/transferencia.png",
+              "width": 1917,
+              "height": 868,
+              "alt": {
+                "es": "Flujo manual con transferencia iniciada, EDR obtenido y dato autorizado descargado.",
+                "en": "Manual workflow showing an initiated transfer, retrieved EDR, and downloaded authorized data."
+              },
+              "caption": {
+                "es": "Transferencia y descarga de datos",
+                "en": "Data transfer and download"
+              }
+            }
+          ]
+        },
+        {
+          "id": "provisioning",
+          "title": {
+            "es": "Configuración de proveedores",
+            "en": "Provider configuration"
+          },
+          "description": {
+            "es": "La interfaz de provisioning permite configurar activos de datos, políticas y definiciones de contratos mediante la Management API.",
+            "en": "The provisioning interface supports configuring data assets, policies, and contract definitions through the Management API."
+          },
+          "note": {
+            "es": "Configuración de demostración local. Las claves y direcciones internas se han ocultado en las copias públicas.",
+            "en": "Local demonstration configuration. Keys and internal addresses have been redacted from the public copies."
+          },
+          "images": [
+            {
+              "src": "/images/projects/puerto-dataspace-edc/provisioning/policy.png",
+              "width": 1917,
+              "height": 870,
+              "alt": {
+                "es": "Configuración de una política de acceso para una empresa transportista en el proveedor Customs.",
+                "en": "Access policy configuration for a transport company in the Customs provider."
+              },
+              "caption": {
+                "es": "Configuración de políticas de acceso",
+                "en": "Access policy configuration"
+              }
+            },
+            {
+              "src": "/images/projects/puerto-dataspace-edc/provisioning/contract.png",
+              "width": 1917,
+              "height": 873,
+              "alt": {
+                "es": "Definición de contrato EDC que relaciona un activo de datos con sus políticas de acceso y contrato.",
+                "en": "EDC contract definition linking a data asset with its access and contract policies."
+              },
+              "caption": {
+                "es": "Definición de contratos",
+                "en": "Contract definition"
+              }
+            }
+          ]
+        }
+      ]
     }
   },
   {
