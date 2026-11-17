@@ -334,3 +334,31 @@ SITE_URL y Vercel: se mantiene el mecanismo de process.env.SITE_URL en config/si
 Para publicar más adelante: seguir los seis pasos del apartado Vercel del README. Preset Astro; npm ci; npm run build; salida dist; raíz con package.json; Node 22.x, comprobando parche >=22.23.4 en logs; SITE_URL con origen HTTPS que Vercel confirme, ámbito Production, antes del build definitivo. La documentación oficial consultada confirma Node 22.x (parches administrados por Vercel), variables por entorno y SSG sin adaptador: https://vercel.com/docs/functions/runtimes/node-js/node-js-versions, https://vercel.com/docs/environment-variables, https://vercel.com/docs/frameworks/frontend/astro. No se verificó el parche concreto disponible en una cuenta, dominio asignado, DNS/cabeceras o despliegue remoto. Cuando exista dominio, repetir las comprobaciones con él y revisar ocho rutas, SEO, HTTPS y privacidad en el hosting.
 
 Archivos modificados: src/data/profile.ts, src/components/Home.astro, scripts/check-build.mjs, scripts/check-browser.mjs, README.md y docs/production-readiness.md. DISTANS, EDC y AURA, sus referencias y capturas permanecen sin modificaciones; docs/project-evidence.md intacto. Sin conexión a Vercel, registro de dominios, commit, push o despliegue. Preview detenido al terminar. Pendientes: dominio real/configuración de cuenta, CV futuro y comprobaciones remotas cuando el propietario decida publicar.
+
+## Corrección de primer build en Vercel — 17-11-2026
+
+El propietario informa de un proyecto Vercel existente cuyo primer build falló: SITE_URL is required for a production deployment. Se conservan Astro 7.4.12 y SSG sin adaptador. Árbol inicial limpio; sin cambios en contenidos, estilos, imágenes, dependencias o servicios externos.
+
+config/site.mjs incorpora resolveSiteOrigin(env), compartido por astro.config.mjs y check-build.mjs. Orden: SITE_URL explícita; si falta y VERCEL=1, VERCEL_PROJECT_PRODUCTION_URL; si ninguna existe, error explícito en producción. SITE_URL inválida no se sustituye. El dominio automático se convierte a HTTPS y se valida con new URL y las reglas de origen: sin credenciales, rutas, query o fragmento; HTTPS, hostname válido y sin localhost/loopback en producción. Se normaliza con url.origin para evitar barras duplicadas. VERCEL_URL no se consulta aunque exista. El fallback automático tiene estas restricciones también en previews.
+
+La documentación oficial confirma que VERCEL_PROJECT_PRODUCTION_URL está disponible en build/runtime y representa un dominio de producción del proyecto (dominio propio seleccionado o vercel.app); se suministra también en previews, sin protocolo. Fuente: https://vercel.com/docs/environment-variables/system-environment-variables. Requiere exponer variables de sistema en Settings → Environment Variables → Automatically expose System Environment Variables. Se verificó la documentación y el comportamiento local simulado, no la disponibilidad efectiva ni el dominio de la cuenta del propietario; no se accedió a Vercel ni se afirmó un despliegue remoto correcto.
+
+Resultados ejecutados con Node 22.23.4:
+
+| Comprobación | Resultado |
+| --- | --- |
+| npm test | Correcto; incluye prioridad, fallback, previews, orígenes ausentes/incorrectos y rechazo de localhost/HTTP |
+| npm run check | 31 archivos, cero errores, advertencias e hints |
+| npm run build | Ocho páginas estáticas y controles de privacidad correctos |
+| npm run check:build | Ocho páginas, 174 enlaces/recursos y anclas correctos |
+| npm audit --json | Salida 0, cero vulnerabilidades notificadas |
+| npm run check:browser con preview en 4347 | 96 casos correctos |
+| Build local sin SITE_URL ni variables Vercel | Correcto, sin canonical/origen inventado |
+| Build con SITE_URL explícita en producción | Correcto; SEO con origen explícito |
+| Build con VERCEL=1, VERCEL_ENV=production y solo VERCEL_PROJECT_PRODUCTION_URL | Correcto; SEO con origen automático HTTPS |
+| Build con ambas fuentes distintas | Correcto; todas las URLs SEO usan SITE_URL |
+| Build de producción sin ambas y con VERCEL_URL | Salida 1 esperada, error explícito; no usa la URL individual del despliegue |
+
+La matriz compiló con orígenes .invalid reservados exclusivamente para pruebas. Cada caso válido ejecutó check-build y comprobó canonical, hreflang, ocho entradas sitemap, robots y og:url. La salida local final se reconstruyó sin esas variables y se comprobó la ausencia de los dominios de prueba en HTML/XML/TXT/JS/CSS; tampoco se encontraron localhost o .invalid en HTML/XML/TXT. No hay ningún dominio ficticio fijado en la configuración de producción. El navegador volvió a comprobar rutas ES/EN, temas, contacto/foco, responsive, cinco imágenes DISTANS, seis EDC y fallback AURA. Las pruebas y logs de la matriz están en .verification/vercel-origin-fix, ignorados por Git.
+
+Pasos para el propietario: revisar estos cambios y publicarlos cuando decida; comprobar la exposición de variables de sistema en el proyecto existente; dejar SITE_URL ausente para usar el dominio de producción suministrado por Vercel, o fijar un origen real explícito. Una SITE_URL antigua/incorrecta conserva prioridad: corregirla o quitarla, sin cambiar VERCEL_URL. Solo entonces reintentar el despliegue por iniciativa del propietario y revisar canonical/hreflang/sitemap/og:url frente al dominio real. Si Vercel no suministra la variable, seguirá el error explícito y habrá que habilitarla o configurar SITE_URL. No se han creado commits, hecho push ni desplegado; preview detenido al terminar. Los apartados históricos que exigían exclusivamente SITE_URL quedan sustituidos por esta política.

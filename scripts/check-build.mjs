@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { resolve, relative, sep } from 'node:path';
-import { getSiteOrigin } from '../config/site.mjs';
+import { resolveSiteOrigin } from '../config/site.mjs';
 import { verifyPublicImages, edcManifest } from './check-public-images.mjs';
 
 const root = resolve('dist');
 await verifyPublicImages('public');
 await verifyPublicImages(root);
-const origin = getSiteOrigin(process.env.SITE_URL);
+const origin = resolveSiteOrigin(process.env);
 async function walk(dir) {
   const entries = await readdir(dir, { withFileTypes: true });
   return (await Promise.all(entries.map(entry => entry.isDirectory()

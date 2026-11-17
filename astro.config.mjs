@@ -1,8 +1,6 @@
 import { defineConfig } from 'astro/config';
-import { getSiteOrigin } from './config/site.mjs';
-const site = getSiteOrigin(process.env.SITE_URL, {
- production: process.env.VERCEL_ENV === 'production',
-});
+import { resolveSiteOrigin } from './config/site.mjs';
+const site = resolveSiteOrigin(process.env);
 export default defineConfig({
  site: site || undefined,
  output: 'static', trailingSlash: 'always',

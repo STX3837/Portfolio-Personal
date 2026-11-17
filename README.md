@@ -82,7 +82,9 @@ Se revisó Chrome headless en 320, 375, 768, 1024 y 1440 px, ambos temas y ambos
 
 Exporta **`SITE_URL` con el origen real de producción** antes de compilar. `.env.example` documenta la variable. La configuración lee `process.env.SITE_URL`; defínela en la terminal o en Vercel, no solo en un archivo `.env`.
 
-La validación está centralizada en `config/site.mjs`: rechaza credenciales, rutas, queries y fragmentos. Con `VERCEL_ENV=production`, la compilación falla si falta el origen o no usa HTTPS.
+`SITE_URL` es prioritaria. Si está vacía y `VERCEL=1`, se utiliza `VERCEL_PROJECT_PRODUCTION_URL`, normalizada a origen HTTPS mediante `new URL()`. Vercel documenta esta variable como dominio de producción disponible durante el build, incluso en previews. Comprueba en Settings → Environment Variables que **Automatically expose System Environment Variables** esté activado. Si no hay origen válido en producción, el build conserva un error explícito. No se consulta `VERCEL_URL` ni se deduce un dominio a partir del nombre del proyecto. Una `SITE_URL` inválida falla, sin activar el fallback.
+
+La validación está centralizada en `config/site.mjs`: rechaza credenciales, rutas, queries y fragmentos. En producción rechaza también HTTP, localhost y direcciones loopback. El fallback automático exige HTTPS y esas mismas validaciones también en previews.
 
 En PowerShell:
 
@@ -91,20 +93,20 @@ $env:SITE_URL = 'https://tu-dominio-real'
 npm run build
 ```
 
-Sustituye el valor ilustrativo por tu URL auténtica. Sin `SITE_URL` se omiten canonical, hreflang absolutos y `og:url`; el sitemap queda vacío y robots no anuncia sitemap. Con la variable definida se generan canonical por página, alternates ES/EN y x-default, y ocho URLs en `/sitemap.xml`. Todas las páginas tienen título, descripción, Open Graph y Twitter Card de resumen. No se declara una imagen social inexistente.
+Sustituye el valor ilustrativo por tu URL auténtica. En local sin ninguna fuente de origen se omiten canonical, hreflang absolutos y `og:url`; el sitemap queda vacío y robots no anuncia sitemap. Con un origen resuelto se generan canonical por página, alternates ES/EN y x-default, y ocho URLs en `/sitemap.xml`. Todas las páginas tienen título, descripción, Open Graph y Twitter Card de resumen. No se declara una imagen social inexistente.
 
 ## Vercel
 
-El dominio gratuito `.vercel.app` definitivo sigue pendiente. No hay una URL de producción configurada ni un despliegue realizado. Los siguientes pasos son para cuando decidas publicar:
+El proyecto ya existe en Vercel según el propietario; su primer build falló por falta de `SITE_URL`. El dominio exacto no se ha comunicado ni se ha inspeccionado la cuenta. El fallback usa exclusivamente el dominio que Vercel suministre, sin fijar uno en el código. Los siguientes pasos son para cuando decidas publicar:
 
 1. Revisa los cambios locales y publica tú el repositorio/rama que decidas utilizar. Importa el repositorio en Vercel, seleccionando como Root Directory la carpeta que contiene `package.json`.
-2. En la configuración de importación revisa el nombre de proyecto y el dominio que Vercel asigne/confirme. No derives `SITE_URL` de una URL de preview ni de un nombre supuesto. Si todavía no conoces el dominio asignado, no configures un valor ficticio: la validación impedirá un build de producción sin `SITE_URL`.
+2. En el proyecto existente verifica que las variables de sistema estén expuestas. Para el primer build puedes dejar `SITE_URL` sin configurar: con `VERCEL=1` se utilizará `VERCEL_PROJECT_PRODUCTION_URL`. Si esta no está disponible, el build falla; configura un `SITE_URL` real confirmado o habilita la exposición de variables de sistema. No uses un valor ficticio ni una URL de despliegue individual.
 3. Selecciona Framework Preset **Astro**, Install Command **`npm ci`**, Build Command **`npm run build`**, Output Directory **`dist`**. En Settings → Build and Deployment elige Node **22.x**; comprueba en los logs que el parche real cumple `>=22.23.4 <23`. Vercel administra los parches, no permite fijar aquí un parche exacto.
-4. En las variables de entorno de **Production**, configura **`SITE_URL`** con el origen HTTPS confirmado, sin ruta, parámetros, fragmento ni credenciales. No requiere prefijo `PUBLIC_`, tokens ni secretos. La variable se incorpora al compilar; cambiarla exige recompilar. No se genera automáticamente desde `VERCEL_URL`.
+4. Si quieres fijar un origen explícito, configura **`SITE_URL`** en **Production** con el origen HTTPS confirmado, sin ruta, parámetros, fragmento ni credenciales; tendrá prioridad sobre el automático. No requiere prefijo `PUBLIC_`, tokens ni secretos. La variable se incorpora al compilar; cambiarla exige recompilar. No se genera automáticamente desde `VERCEL_URL`.
 5. Con ese origen conocido, reproduce localmente `npm ci --include=optional`, `npm audit`, `npm test`, `npm run check`, `npm run build` y `npm run check:build`. En otra terminal inicia `npm run preview -- --host 127.0.0.1 --port 4347` y ejecuta `npm run check:browser` con `PREVIEW_URL=http://127.0.0.1:4347`. Exporta `SITE_URL` en la terminal y, para simular Production, `VERCEL_ENV=production`. No basta con crear un `.env` local.
 6. Solo cuando decidas publicar, inicia el despliegue en Vercel. Después comprueba HTTPS, las ocho rutas y recursos, `/sitemap.xml`, `/robots.txt`, canonical/hreflang con el dominio confirmado, contacto y ausencia de rutas privadas. Si cambia el dominio asignado, corrige `SITE_URL` y recompila antes de darlo por terminado.
 
-La configuración existente se conserva. [Astro estático en Vercel](https://vercel.com/docs/frameworks/frontend/astro) no requiere adaptador; Vercel documenta [Node 22.x y sus actualizaciones automáticas](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions) y el [alcance de las variables por entorno](https://vercel.com/docs/environment-variables). Consulta oficial realizada el 17-11-2026; el parche disponible en tu cuenta se comprobará al publicar. Para previews se conserva el comportamiento local sin origen si no configuras `SITE_URL`; no se confunden esas URLs con el dominio de producción.
+La configuración estática se conserva. [Astro estático en Vercel](https://vercel.com/docs/frameworks/frontend/astro) no requiere adaptador; Vercel documenta [Node 22.x](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions) y las [variables de sistema y dominio de producción](https://vercel.com/docs/environment-variables/system-environment-variables). Consulta oficial realizada el 17-11-2026; la configuración concreta de tu cuenta se comprobará al publicar. Los previews de Vercel con variables de sistema expuestas enlazan al origen de producción; los builds locales sin origen mantienen la omisión explícita de canonical.
 
 `vercel.json` fija preset Astro, instalación `npm ci`, compilación `npm run build`, salida `dist` y barra final. No requiere adaptador de servidor. No se ha publicado ni modificado ningún servicio externo. Los [pasos completos de publicación](docs/production-readiness.md) incluyen dominio, variables de entorno, DNS y verificaciones posteriores.
 
