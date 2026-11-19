@@ -1,14 +1,21 @@
 import { statSync } from 'node:fs';
 import { resolve } from 'node:path';
+import type { Locale } from '../i18n/ui';
 // Add only verified public URLs. CV paths are relative to public/.
 export const profile = {
  name: 'Alberto Paleteiro',
  github: 'https://github.com/STX3837',
  linkedin: 'https://www.linkedin.com/in/alberto-josé-paleteiro-lópez-78a90b413',
  email: 'alberto.paleteiro.dev@gmail.com',
- cv: '',
+ cv: { es: '/cv/Alberto_Paleteiro_CV_ES.pdf', en: '' },
 };
-export const cvUrl = profile.cv && /^[/][a-zA-Z0-9_./-]+$/.test(profile.cv) && !profile.cv.includes('..') && statSync(resolve('public', profile.cv.slice(1)), { throwIfNoEntry: false })?.isFile() ? profile.cv : undefined;
+export function getCv(locale: Locale) {
+ for (const language of (locale === 'en' ? ['en', 'es'] : ['es']) as Locale[]) {
+  const href = profile.cv[language];
+  if (href && /^[/][a-zA-Z0-9_./-]+\.pdf$/.test(href) && !href.includes('..') && statSync(resolve('public', href.slice(1)), { throwIfNoEntry: false })?.isFile()) return { href, language };
+ }
+ return undefined;
+}
 export const socialLinks = [
  { label: 'GitHub', href: profile.github },
  { label: 'LinkedIn', href: profile.linkedin },

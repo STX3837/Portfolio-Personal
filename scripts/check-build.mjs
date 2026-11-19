@@ -5,6 +5,10 @@ import { resolveSiteOrigin } from '../config/site.mjs';
 import { verifyPublicImages, edcManifest } from './check-public-images.mjs';
 
 const root = resolve('dist');
+const cvPath = '/cv/Alberto_Paleteiro_CV_ES.pdf';
+const publicCv = await readFile(resolve('public', '.' + cvPath));
+assert.ok(publicCv.length > 0 && publicCv.subarray(0, 5).toString() === '%PDF-');
+assert.deepEqual(await readFile(resolve(root, '.' + cvPath)), publicCv, 'Published CV bytes unchanged');
 await verifyPublicImages('public');
 await verifyPublicImages(root);
 const origin = resolveSiteOrigin(process.env);
@@ -33,7 +37,12 @@ for (const [route, { html, ids }] of pages) {
     for (const href of ['https://github.com/STX3837', 'https://www.linkedin.com/in/alberto-josé-paleteiro-lópez-78a90b413', 'mailto:alberto.paleteiro.dev@gmail.com']) {
       check(html.includes(`href="${href}"`), `confirmed contact ${href}`);
     }
-    check(!/<a\b[^>]*\bdownload\b/.test(html), 'pending CV has no download link');
+    const downloads = [...html.matchAll(/<a\b[^>]*\bdownload\b[^>]*>([\s\S]*?)<\/a>/g)];
+    check(downloads.length === 1, 'one CV download per home page');
+    check(attr(downloads[0][0], 'href') === cvPath, 'local Spanish CV');
+    check(attr(downloads[0][0], 'hreflang') === 'es', 'CV document language');
+    check(downloads[0][1].includes(route === '/' ? 'Descargar CV' : 'Download CV (Spanish)'), 'localized CV label');
+    check(!html.includes('Alberto_Paleteiro_CV_EN.pdf'), 'no invented English PDF');
     const cards = [...html.matchAll(/<article\b[^>]*class="project-card"[^>]*>([\s\S]*?)<\/article>/g)].map(m => m[1]);
     check(cards.length === 3, 'exactly three featured projects');
     for (const [index, slug] of ['distans', 'puerto-dataspace-edc', 'aura'].entries()) {

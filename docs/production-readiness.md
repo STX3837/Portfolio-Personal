@@ -362,3 +362,40 @@ Resultados ejecutados con Node 22.23.4:
 La matriz compiló con orígenes .invalid reservados exclusivamente para pruebas. Cada caso válido ejecutó check-build y comprobó canonical, hreflang, ocho entradas sitemap, robots y og:url. La salida local final se reconstruyó sin esas variables y se comprobó la ausencia de los dominios de prueba en HTML/XML/TXT/JS/CSS; tampoco se encontraron localhost o .invalid en HTML/XML/TXT. No hay ningún dominio ficticio fijado en la configuración de producción. El navegador volvió a comprobar rutas ES/EN, temas, contacto/foco, responsive, cinco imágenes DISTANS, seis EDC y fallback AURA. Las pruebas y logs de la matriz están en .verification/vercel-origin-fix, ignorados por Git.
 
 Pasos para el propietario: revisar estos cambios y publicarlos cuando decida; comprobar la exposición de variables de sistema en el proyecto existente; dejar SITE_URL ausente para usar el dominio de producción suministrado por Vercel, o fijar un origen real explícito. Una SITE_URL antigua/incorrecta conserva prioridad: corregirla o quitarla, sin cambiar VERCEL_URL. Solo entonces reintentar el despliegue por iniciativa del propietario y revisar canonical/hreflang/sitemap/og:url frente al dominio real. Si Vercel no suministra la variable, seguirá el error explícito y habrá que habilitarla o configurar SITE_URL. No se han creado commits, hecho push ni desplegado; preview detenido al terminar. Los apartados históricos que exigían exclusivamente SITE_URL quedan sustituidos por esta política.
+
+## Iteración 11 — currículum profesional (19-11-2026)
+
+Rama inicial main. Único cambio previo del usuario: public/cv/ sin seguimiento, con Alberto_Paleteiro_CV_ES.pdf. Se conservó ese archivo byte a byte y no se creó ningún commit, push ni despliegue. El propietario confirma portfolio publicado en https://portfolio-personal-lyart-three.vercel.app/ y publicación automática desde main; esta revisión es local y no verifica un despliegue remoto del CV.
+
+Integración: profile.cv pasa a rutas por idioma { es: '/cv/Alberto_Paleteiro_CV_ES.pdf', en: '' }. getCv(locale) verifica existencia de archivo local al compilar, selecciona el inglés real si está configurado y existe, o usa español como fallback inglés. Sin documento válido por ruta/existencia, no muestra enlace. No se ha inventado una traducción del PDF. El componente Home reutiliza el botón secundario de contacto, una sola vez por página: Descargar CV / Download CV (Spanish). Es enlace HTML con download, type application/pdf, hreflang es e icono decorativo aria-hidden; no requiere JavaScript y respeta CSS y foco existentes. Cuando exista un PDF inglés, bastará configurar profile.cv.en: aparecerá Download CV y hreflang en.
+
+PDF original: 74581 bytes, PDF 1.4, una página, no cifrado. Dos motores extrajeron texto (pypdf: 2915 caracteres; MuPDF: 2902, distinta extracción de saltos/espacios) y MuPDF renderizó la página completa sin reparación. Revisión visual del render realizada. SHA-256 de original y copia dist: 9983505fcbcbe6e6cda949d04f48b14d557453a156d52fb2aa82e826dd23ad4e. La comprobación antes/después confirma que el PDF del usuario no cambió. No se reescribió ni saneó automáticamente.
+
+Hallazgos que se conservan y deben conocerse al publicar:
+
+- pypdf emitió Xref table not zero-indexed; corrigió índices solo en su lectura en memoria. MuPDF declaró is_repaired=False y pudo abrir, extraer texto y renderizar. No se observó un fallo funcional, pero no se certifica conformidad PDF exhaustiva.
+- pypdf detectó metadatos de autor y título con el nombre del propietario y fechas de generación; MuPDF no expuso esos campos en su lectura. La discrepancia de lectura no permite afirmar que el archivo carezca de metadatos.
+- Hay un adjunto Content Credentials de 24294 bytes: manifiesto C2PA con referencias a ChatGPT, herramienta generadora, fechas, identificadores de procedencia y certificados públicos de firma. Se inspeccionaron sus cadenas; no se detectaron secretos ni rutas privadas evidentes en lo revisado. No se verificó criptográficamente la firma C2PA ni se certifica la ausencia de cualquier dato oculto. El adjunto viajará con el PDF público. No se eliminó porque el usuario exige conservar el documento.
+- No se detectaron OpenAction ni AA en el catálogo inspeccionado; no es una auditoría antimalware completa.
+
+Los analizadores pypdf y MuPDF se instalaron exclusivamente en .verification/iteration-11/pdf-tools (ignorado), sin modificar dependencias npm ni la instalación Python global. Texto extraído, informe de metadatos, render y adjunto extraído permanecen privados en .verification/iteration-11; no se copian a public ni dist. Solo se publica el PDF original autorizado.
+
+| Verificación ejecutada | Resultado real |
+| --- | --- |
+| npm test | Correcto; configuración de dominio y privacidad de imágenes |
+| npm run check | 31 archivos; 0 errores, advertencias e hints |
+| npm run build | Ocho páginas estáticas, barreras public/dist correctas |
+| npm run check:build | Ocho páginas, 176 enlaces/recursos/anclas; PDF dist idéntico al original |
+| Build SEO con SITE_URL del portfolio publicado, aportado por el propietario | Canonical, hreflang, sitemap, robots y og:url correctos con ese mismo origen |
+| npm audit --json | Salida 0; cero vulnerabilidades notificadas |
+| npm run check:browser con preview 4347 | 96 casos correctos, más solicitud del PDF sin autenticación |
+
+Preview respondió HTTP 200 application/pdf, sin redirección ni autenticación; respuesta idéntica al original. Los enlaces ES/EN apuntan al mismo PDF español, con idioma/textos correctos y sin enlace ficticio EN. La navegación con Tab llega al CV entre correo y GitHub y conserva foco visible en ambos idiomas. El enlace está presente en HTML estático. No se fuerza un visor interno; la decisión de descargar/abrir depende del navegador y su configuración.
+
+Chrome comprueba ocho rutas, tres proyectos ES/EN, temas/persistencia, menú, idiomas/hash, contacto, contraste DOM y ausencia de desbordamiento a 320/375/430/768/1024/1440. Se revisaron visualmente las doce capturas de contacto a 375/768/1440, ES/EN y ambos temas. Se generaron 64 PNG y browser-results.json en .verification/iteration-11/browser. Continúan disponibles las cinco imágenes DISTANS y las seis EDC saneadas; AURA conserva su concepto. Pasan los controles de originales/rutas privadas de EDC y los 404 correspondientes. No se ejecutaron servicios externos ni se verificó entrega de email o perfiles remotos.
+
+Archivos modificados: src/data/profile.ts, src/i18n/ui.ts, src/components/Home.astro, scripts/check-build.mjs, scripts/check-browser.mjs, README.md y este informe; el PDF del usuario sigue sin modificar y pendiente de añadir a Git. Inalterados proyectos, galerías, CSS, SITE_URL/fallback, configuración Astro/Node/Vercel, package.json, lockfile y docs/project-evidence.md. dist final corresponde al origen real aportado, definido únicamente en la terminal de verificación; no se añadieron variables, secretos ni dominio nuevo al código.
+
+Estado: integración técnicamente preparada, con los hallazgos de metadatos/xref anteriores documentados. Antes de publicar, revisar conscientemente que se quiere distribuir este PDF con su procedencia adjunta; para cambiarlo se requeriría un documento autorizado por el propietario, no una edición automática. Para sustituir o añadir inglés, seguir el apartado CV del README y repetir validación/pruebas. Lectores de pantalla y otros motores/dispositivos siguen pendientes.
+
+Publicación por el propietario: revisar diff y PDF, añadir explícitamente los siete archivos modificados y public/cv/Alberto_Paleteiro_CV_ES.pdf (no .verification); crear su commit y hacer push a main cuando decida. Según el despliegue automático descrito por él, ese push disparará Vercel. Esperar el build correcto y comprobar /, /en/, descarga directa /cv/Alberto_Paleteiro_CV_ES.pdf y metadatos con el dominio existente. No se modifica la configuración de Vercel. No se ejecutó esta publicación. Preview detenido al terminar.

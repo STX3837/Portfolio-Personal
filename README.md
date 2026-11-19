@@ -68,9 +68,13 @@ Configura `name`, `email`, `github` y `linkedin` en `src/data/profile.ts`. El no
 
 Canales confirmados por el propietario: [GitHub STX3837](https://github.com/STX3837), [LinkedIn](https://www.linkedin.com/in/alberto-josé-paleteiro-lópez-78a90b413) y [alberto.paleteiro.dev@gmail.com](mailto:alberto.paleteiro.dev@gmail.com). Los perfiles aparecen en hero, contacto y footer mediante el componente compartido; el correo se muestra en contacto. La URL de LinkedIn conserva su identificador con acentos; se valida su sintaxis y enlace renderizado, sin deducir ni cambiar una URL canónica externa. No se ha comprobado la entrega de correo ni el inicio de sesión en plataformas externas.
 
-Coloca el CV en `public/`, por ejemplo `public/cv.pdf`, y configura `cv: '/cv.pdf'`. El botón aparece únicamente si el archivo existe durante la compilación. Recompila tras añadirlo. Los archivos públicos son descargables por cualquier visitante.
+El CV definitivo en español está en `public/cv/Alberto_Paleteiro_CV_ES.pdf`, ruta pública `/cv/Alberto_Paleteiro_CV_ES.pdf`. En `src/data/profile.ts`, `profile.cv` contiene las rutas por idioma: `es` apunta a ese documento y `en` permanece vacío. `getCv(locale)` comprueba que el archivo exista al compilar; si no existe, omite el enlace. La versión inglesa usa el PDF español como fallback, sin inventar otro archivo.
 
-El CV está pendiente: `cv` permanece vacío, sin botón de descarga, archivo de ejemplo ni mensaje de «próximamente».
+El enlace aparece una sola vez en contacto: **Descargar CV** en español y **Download CV (Spanish)** en inglés. Es un enlace HTML local con `download`, `type="application/pdf"` y `hreflang="es"`, sin dependencia de JavaScript. Según el navegador puede descargarse o abrirse; ambos comportamientos acceden al mismo recurso.
+
+Para sustituirlo, reemplaza el PDF autorizado en esa misma ruta, valida páginas/texto/metadatos y recompila. Para incorporar inglés, añade el documento real bajo `public/cv/` y configura `profile.cv.en`; no cambies componentes. Entonces la página inglesa seleccionará ese PDF y mostrará **Download CV**, con su idioma correspondiente. Mientras no exista, conserva el campo vacío. Las comprobaciones de build/navegador de esta iteración verifican el estado actual (un PDF español compartido); adapta sus expectativas al incorporar el documento inglés real.
+
+El PDF original no se ha modificado. Contiene metadatos de autor/título y un adjunto **Content Credentials** de procedencia C2PA que identifica ChatGPT y fechas de generación. Un lector emitió un aviso de tabla xref; otro lo abrió y renderizó sin reparación. El detalle y los límites de validación están en el informe de producción. El archivo y sus metadatos serán públicos: no se han eliminado ni reescrito silenciosamente.
 
 ## Temas y accesibilidad
 
@@ -97,7 +101,7 @@ Sustituye el valor ilustrativo por tu URL auténtica. En local sin ninguna fuent
 
 ## Vercel
 
-El proyecto ya existe en Vercel según el propietario; su primer build falló por falta de `SITE_URL`. El dominio exacto no se ha comunicado ni se ha inspeccionado la cuenta. El fallback usa exclusivamente el dominio que Vercel suministre, sin fijar uno en el código. Los siguientes pasos son para cuando decidas publicar:
+El propietario confirma el portfolio publicado en `https://portfolio-personal-lyart-three.vercel.app/` y despliegue automático desde `main` del repositorio `https://github.com/STX3837/Portfolio-Personal`. Esta iteración valida cambios localmente; no accede a la cuenta ni despliega. El fallback de dominio se conserva sin codificar una URL nueva en la configuración. Los siguientes pasos son para futuras publicaciones:
 
 1. Revisa los cambios locales y publica tú el repositorio/rama que decidas utilizar. Importa el repositorio en Vercel, seleccionando como Root Directory la carpeta que contiene `package.json`.
 2. En el proyecto existente verifica que las variables de sistema estén expuestas. Para el primer build puedes dejar `SITE_URL` sin configurar: con `VERCEL=1` se utilizará `VERCEL_PROJECT_PRODUCTION_URL`. Si esta no está disponible, el build falla; configura un `SITE_URL` real confirmado o habilita la exposición de variables de sistema. No uses un valor ficticio ni una URL de despliegue individual.
@@ -299,3 +303,11 @@ Configurados exclusivamente los canales confirmados del propietario en profile.t
 Verificación del 17-11-2026: npm ci --include=optional, npm test, npm run check (31 archivos sin diagnósticos), npm run build (ocho páginas), npm run check:build (174 enlaces/recursos) y npm run check:browser (96 casos) correctos. npm audit: **0 vulnerabilidades**. SITE_URL probado con dominio reservado y barra final, luego retirado de dist. Revisados inicio/contacto en 375/768/1440 px, ambos temas; navegación por teclado y foco de contacto correctos. Artefactos locales ignorados: .verification/iteration-10 (64 PNG). Detalles y límites en [production-readiness.md](docs/production-readiness.md).
 
 El dominio definitivo sigue pendiente. No se ha desplegado ni conectado Vercel; no se han creado commits ni realizado push. Los pasos del apartado Vercel son instrucciones futuras, no acciones ya ejecutadas.
+
+## Iteración 11 — CV integrado (19-11-2026)
+
+El documento español original está disponible para la próxima publicación en /cv/Alberto_Paleteiro_CV_ES.pdf y se enlaza una vez desde contacto. Inglés muestra Download CV (Spanish) y usa el mismo archivo. Rutas por idioma centralizadas en profile.cv, con ocultación si faltan archivos y preparación para un PDF inglés real. Se mantiene el documento original, incluidos metadatos y Content Credentials descritos en el apartado CV.
+
+npm test, check (31 archivos sin diagnósticos), build (ocho páginas), check:build (176 enlaces/recursos) y check:browser (96 casos) correctos; npm audit: 0 vulnerabilidades. Preview devuelve el PDF intacto con HTTP 200 application/pdf sin autenticación. Revisado el enlace a 375/768/1440 en ambos idiomas y temas. SEO comprobado con el dominio publicado aportado por el propietario, sin cambiar configuración. Resultados completos y límites en docs/production-readiness.md.
+
+Para publicar este cambio, revisa el PDF y el diff, añade el PDF y los archivos de esta iteración a tu commit y haz push a main cuando lo decidas; eso activará el despliegue automático de Vercel ya configurado por ti. Comprueba después ambos enlaces y la ruta PDF pública. No incluyas .verification. No se han creado commits, hecho push ni desplegado desde este entorno.

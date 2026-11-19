@@ -8,6 +8,11 @@ import { resolve } from 'node:path';
 const base = process.env.PREVIEW_URL || 'http://127.0.0.1:4321';
 const previewResponse = await fetch(base);
 assert.ok(previewResponse.ok, `Preview is not ready: ${base} returned HTTP ${previewResponse.status}. Finish the build before starting preview.`);
+const cvPath = '/cv/Alberto_Paleteiro_CV_ES.pdf';
+const pdfResponse = await fetch(base + cvPath, { redirect: 'error' });
+assert.equal(pdfResponse.status, 200, 'CV available without authentication');
+assert.ok(pdfResponse.headers.get('content-type')?.includes('application/pdf'));
+assert.deepEqual(Buffer.from(await pdfResponse.arrayBuffer()), await readFile(resolve('public', '.' + cvPath)), 'Preview serves the original PDF');
 const executable = process.env.CHROME_PATH || [
   'C:/Program Files/Google/Chrome/Application/chrome.exe',
   'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
@@ -76,7 +81,8 @@ try {
           const mail = contact.find(a => a.href === 'mailto:alberto.paleteiro.dev@gmail.com');
           assert.ok(mail?.text.includes('alberto.paleteiro.dev@gmail.com'));
           assert.equal(mail.label, (path === '/' ? 'Enviar email' : 'Send email') + ': alberto.paleteiro.dev@gmail.com');
-          assert.equal(await evaluate("document.querySelectorAll('a[download]').length"), 0, 'No pending CV download');
+          const cv = await evaluate("Array.from(document.querySelectorAll('a[download]'), a => ({ href:a.getAttribute('href'), label:a.textContent.trim(), language:a.hreflang, type:a.type, decorative:a.querySelector('span')?.getAttribute('aria-hidden') }))");
+          assert.deepEqual(cv, [{ href:cvPath, label:(path === '/' ? 'Descargar CV' : 'Download CV (Spanish)')+' ↓', language:'es', type:'application/pdf', decorative:'true' }]);
         }
         if (path.endsWith('/projects/distans/')) {
           const context = await evaluate("Array.from(document.querySelectorAll('.project-context li'), item => item.textContent)");
@@ -189,7 +195,7 @@ try {
   for (const route of ['/', '/en/']) {
     await navigate(route);
     await evaluate("(() => { const a=[...document.querySelectorAll('a')]; a[a.indexOf(document.querySelector('#contact a'))-1].focus(); })()");
-    for (const href of ['mailto:alberto.paleteiro.dev@gmail.com','https://github.com/STX3837','https://www.linkedin.com/in/alberto-josé-paleteiro-lópez-78a90b413']) {
+    for (const href of ['mailto:alberto.paleteiro.dev@gmail.com',cvPath,'https://github.com/STX3837','https://www.linkedin.com/in/alberto-josé-paleteiro-lópez-78a90b413']) {
       await send('Input.dispatchKeyEvent', { type:'keyDown', key:'Tab', code:'Tab', windowsVirtualKeyCode:9 });
       assert.equal(await evaluate("document.activeElement.getAttribute('href')"), href, 'Contact keyboard order');
       assert.equal(await evaluate("getComputedStyle(document.activeElement).outlineStyle !== 'none'"), true, 'Contact visible focus');
